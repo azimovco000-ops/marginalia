@@ -613,83 +613,83 @@ const ERAS = {
     cls:'era-rome',
     dot:'#C9A24B',
     eyebrow:'Ancient Rome',
-    bg: (seed)=>`
+    bg: (seed)=>{ const rot=(seed*37%40)-20, sx=120+(seed*13%220), sy=120+(seed*29%560), op=0.14+(seed%7)*0.02; return `
       <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="marble${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.85  0 0 0 0 0.78  0 0 0 0 0.62  0 0 0 0.06 0"/></filter>
         </defs>
         <rect width="400" height="800" filter="url(#marble${seed})"/>
-        <g opacity="0.16" stroke="#E8D9B0" stroke-width="1.4" fill="none">
+        <g opacity="${op}" stroke="#E8D9B0" stroke-width="1.4" fill="none" transform="translate(${(seed*7%60)-30},0)">
           <line x1="60" y1="-20" x2="60" y2="500"/><line x1="100" y1="-20" x2="100" y2="540"/>
           <line x1="340" y1="280" x2="340" y2="860"/><line x1="380" y1="320" x2="380" y2="860"/>
         </g>
-        <g transform="translate(200,690)" opacity="0.22">
+        <g transform="translate(${sx},${sy}) rotate(${rot})" opacity="0.22">
           <path d="M-70,0 C-70,-26 -40,-30 -22,-14 C-8,-30 8,-30 22,-14 C40,-30 70,-26 70,0 C70,14 40,10 22,4 C8,12 -8,12 -22,4 C-40,10 -70,14 -70,0 Z" fill="none" stroke="#E8D9B0" stroke-width="1.6"/>
           <circle cx="0" cy="-6" r="2" fill="#E8D9B0"/>
         </g>
-      </svg>`
+      </svg>`; }
   },
   'Existentialism': {
     cls:'era-smoke',
     dot:'#D8543C',
     eyebrow:'20th-Century Europe',
-    bg: (seed)=>`
+    bg: (seed)=>{ const hy=80+(seed*17%560), dotx=60+(seed*23%300), doty=60+(seed*31%140); return `
       <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="smoke${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.018" numOctaves="4" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.09 0"/></filter>
         </defs>
         <rect width="400" height="800" filter="url(#smoke${seed})"/>
         <g opacity="0.2" stroke="#E8E4DC" stroke-width="1">
-          <line x1="0" y1="120" x2="400" y2="118"/>
-          <line x1="0" y1="124" x2="400" y2="122"/>
+          <line x1="0" y1="${hy}" x2="400" y2="${hy-2}"/>
+          <line x1="0" y1="${hy+4}" x2="400" y2="${hy+2}"/>
         </g>
-        <circle cx="330" cy="90" r="3.5" fill="#D8543C" opacity="0.55"/>
-        <line x1="330" y1="93.5" x2="330" y2="150" stroke="#9C9890" stroke-width="1.4" opacity="0.4"/>
-      </svg>`
+        <circle cx="${dotx}" cy="${doty}" r="3.5" fill="#D8543C" opacity="0.55"/>
+        <line x1="${dotx}" y1="${doty+3.5}" x2="${dotx}" y2="${doty+60}" stroke="#9C9890" stroke-width="1.4" opacity="0.4"/>
+      </svg>`; }
   },
   'Eastern & Proverbs': {
     cls:'era-ink',
     dot:'#8FA383',
     eyebrow:'Classical East Asia',
-    bg: (seed)=>`
+    bg: (seed)=>{ const cx=120+(seed*19%160), cy=520+(seed*23%220), rot=(seed*41%60)-30, rad=78+(seed%5)*12; return `
       <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="paper${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.025 0.05" numOctaves="2" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.85  0 0 0 0 0.65  0 0 0 0.05 0"/></filter>
         </defs>
         <rect width="400" height="800" filter="url(#paper${seed})"/>
-        <circle cx="200" cy="660" r="98" fill="none" stroke="#E3DCC2" stroke-width="5" opacity="0.18" stroke-linecap="round" stroke-dasharray="540 40" transform="rotate(-18 200 660)"/>
-      </svg>`
+        <circle cx="${cx}" cy="${cy}" r="${rad}" fill="none" stroke="#E3DCC2" stroke-width="5" opacity="0.18" stroke-linecap="round" stroke-dasharray="540 40" transform="rotate(${rot} ${cx} ${cy})"/>
+      </svg>`; }
   },
   'Literature': {
     cls:'era-vellum',
     dot:'#A8763F',
     eyebrow:'The Western Canon',
-    bg: (seed)=>`
+    bg: (seed)=>{ const op=0.16+(seed%6)*0.02, fx=(seed*13%40)-20; return `
       <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="vellum${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.018 0.03" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.74  0 0 0 0 0.5  0 0 0 0.07 0"/></filter>
         </defs>
         <rect width="400" height="800" filter="url(#vellum${seed})"/>
-        <g opacity="0.2" stroke="#D8B978" stroke-width="1.3" fill="none">
+        <g opacity="${op}" stroke="#D8B978" stroke-width="1.3" fill="none" transform="translate(${fx},0)">
           <path d="M30,40 Q30,18 52,18 M30,40 Q30,18 8,18"/>
           <path d="M370,760 Q370,782 348,782 M370,760 Q370,782 392,782"/>
         </g>
-      </svg>`
+      </svg>`; }
   },
   'Psychology': {
     cls:'era-mind',
     dot:'#9B8FC9',
     eyebrow:'Depth Psychology',
-    bg: (seed)=>`
+    bg: (seed)=>{ const cx=120+(seed*17%160), cy=480+(seed*23%260), base=40+(seed%5)*8; return `
       <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="dream${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.022" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.65  0 0 0 0 0.58  0 0 0 0 0.85  0 0 0 0.07 0"/></filter>
         </defs>
         <rect width="400" height="800" filter="url(#dream${seed})"/>
         <g opacity="0.16" stroke="#C9C2E8" stroke-width="1" fill="none">
-          <circle cx="200" cy="640" r="50"/><circle cx="200" cy="640" r="78"/><circle cx="200" cy="640" r="106"/>
+          <circle cx="${cx}" cy="${cy}" r="${base}"/><circle cx="${cx}" cy="${cy}" r="${base+28}"/><circle cx="${cx}" cy="${cy}" r="${base+56}"/>
         </g>
-      </svg>`
+      </svg>`; }
   }
 };
 
@@ -771,7 +771,7 @@ function sizeForLength(len){ if(len > 140) return 21; if(len > 90) return 26; if
 function svgBookmark(filled){ return `<svg viewBox="0 0 24 24" fill="${filled?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>`; }
 function buildDeck(){ const filtered = QUOTES.filter(q => activeCategories.has(q.cat)); deck = shuffle(filtered.length ? filtered : QUOTES); renderDeck(); }
 function buildDeckFrom(list, doShuffle){ deck = doShuffle ? shuffle(list) : [...list]; if(!deck.length) deck=[...QUOTES]; renderDeck(); }
-function renderDeck(){ feed.innerHTML = ''; rail.innerHTML = ''; const total = deck.length; deck.forEach((_, i)=>{ const seg = document.createElement('div'); seg.className = 'rail-seg'; seg.id = 'seg-'+i; seg.innerHTML = '<div class="rail-seg-fill"></div>'; rail.appendChild(seg); }); deck.forEach((q, i)=>{ const era = ERAS[q.cat]; const card = document.createElement('div'); card.className = 'card ' + era.cls; card.dataset.index = i; const fontSize = sizeForLength(q.text.length); const saved = isSaved(q); const seed = (i*7 + 13) % 89; card.innerHTML = `<div class="card-bg">${era.bg(seed)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="eyebrow">${era.eyebrow}</div><div class="quote-text" style="font-size:${fontSize}px;">${q.text}</div><div class="attribution"><div class="attr-left"><div class="attr-line"></div><div class="author">${q.author}</div><div class="source" data-idx="${i}">${q.source}${q.context ? ' <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>' : ''}</div></div><div style="position:relative;"><span class="save-pop" id="pop-${i}">Saved</span><div class="action-stack"><div class="save-btn ${saved?'saved':''}" data-idx="${i}">${svgBookmark(saved)}</div><div class="mini-btn share-btn" data-idx="${i}" title="Share as image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div><div class="mini-btn copy-btn" data-idx="${i}" title="Copy text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div><div class="mini-btn narrate-btn" data-idx="${i}" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div></div></div></div></div>${i===0 ? '<div class="sit-hint"><span class="ring"></span>Hold to sit with it</div>' : ''}`; feed.appendChild(card); }); const endCard = document.createElement('div'); endCard.className = 'card era-mind end-card'; endCard.dataset.index = total; endCard.innerHTML = `<div class="card-bg">${ERAS['Psychology'].bg(91)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="end-icon">·  ·  ·</div><div class="end-title">That's the deck.</div><div class="end-sub">${total} lines from minds that thought hard about how to live. Worth rereading slower than you scrolled it.</div><button class="restart-btn" id="restartBtn">Shuffle &amp; start over</button></div>`; feed.appendChild(endCard); attachCardListeners(); setupObserver(); updateProgress(0); updateSavedBadge(); feed.scrollTo({top:0, behavior:'instant'}); }
+function renderDeck(){ feed.innerHTML = ''; rail.innerHTML = ''; const total = deck.length; deck.forEach((_, i)=>{ const seg = document.createElement('div'); seg.className = 'rail-seg'; seg.id = 'seg-'+i; seg.innerHTML = '<div class="rail-seg-fill"></div>'; rail.appendChild(seg); }); deck.forEach((q, i)=>{ const era = ERAS[q.cat]; const card = document.createElement('div'); card.className = 'card ' + era.cls; card.dataset.index = i; const fontSize = sizeForLength(q.text.length); const saved = isSaved(q); const seed = scHash(q.text + q.author) % 9973; card.innerHTML = `<div class="card-bg">${era.bg(seed)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="eyebrow">${era.eyebrow}</div><div class="quote-text" style="font-size:${fontSize}px;">${q.text}</div><div class="attribution"><div class="attr-left"><div class="attr-line"></div><div class="author">${q.author}</div><div class="source" data-idx="${i}">${q.source}${q.context ? ' <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>' : ''}</div></div><div style="position:relative;"><span class="save-pop" id="pop-${i}">Saved</span><div class="action-stack"><div class="save-btn ${saved?'saved':''}" data-idx="${i}">${svgBookmark(saved)}</div><div class="mini-btn share-btn" data-idx="${i}" title="Share as image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div><div class="mini-btn copy-btn" data-idx="${i}" title="Copy text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div><div class="mini-btn narrate-btn" data-idx="${i}" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div></div></div></div></div>${i===0 ? '<div class="sit-hint"><span class="ring"></span>Hold to sit with it</div>' : ''}`; feed.appendChild(card); }); const endCard = document.createElement('div'); endCard.className = 'card era-mind end-card'; endCard.dataset.index = total; endCard.innerHTML = `<div class="card-bg">${ERAS['Psychology'].bg(91)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="end-icon">·  ·  ·</div><div class="end-title">That's the deck.</div><div class="end-sub">${total} lines from minds that thought hard about how to live. Worth rereading slower than you scrolled it.</div><button class="restart-btn" id="restartBtn">Shuffle &amp; start over</button></div>`; feed.appendChild(endCard); attachCardListeners(); setupObserver(); updateProgress(0); updateSavedBadge(); feed.scrollTo({top:0, behavior:'instant'}); }
 function attachCardListeners(){ document.querySelectorAll('.save-btn').forEach(btn=>{ btn.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(btn.dataset.idx, 10); const q = deck[idx]; const nowSaved = toggleSaved(q); btn.classList.toggle('saved', nowSaved); btn.innerHTML = svgBookmark(nowSaved); if(nowSaved){ const pop = document.getElementById('pop-'+idx); pop.classList.remove('show'); void pop.offsetWidth; pop.classList.add('show'); } }); }); document.querySelectorAll('.share-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); openShare(deck[parseInt(btn.dataset.idx,10)]); }); }); document.querySelectorAll('.copy-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const q=deck[parseInt(btn.dataset.idx,10)]; copyQuote(q); }); }); document.querySelectorAll('.narrate-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); narrateQuote(deck[parseInt(btn.dataset.idx,10)], btn); }); }); document.querySelectorAll('.source[data-idx]').forEach(el=>{ el.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(el.dataset.idx, 10); openContextSheet(deck[idx]); }); }); document.getElementById('restartBtn')?.addEventListener('click', ()=>{ buildDeck(); }); }
 let currentIndex = 0; let observer = null; function setupObserver(){ if(observer) observer.disconnect(); const cards = Array.from(document.querySelectorAll('.card')); observer = new IntersectionObserver((entries)=>{ entries.forEach(entry=>{ const idx = parseInt(entry.target.dataset.index ?? '-1', 10); if(entry.isIntersecting && entry.intersectionRatio > 0.6){ cards.forEach(c=>c.classList.remove('in-view')); entry.target.classList.add('in-view'); if(!isNaN(idx) && idx >= 0){ if(idx > currentIndex) trackView(); currentIndex = idx; updateProgress(idx); } } }); }, { threshold:[0.6] }); cards.forEach(c=>observer.observe(c)); }
 function trackView(){ viewedThisSession++; if(viewedThisSession === SESSION_CAP && !nudgeShown){ nudgeShown = true; setTimeout(insertNudgeCard, 900); } }
@@ -974,6 +974,24 @@ let lastShareQuote=null, lastShareBlob=null;
 function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function wrapText(ctx,text,maxW){ const words=text.split(' '); const lines=[]; let line=''; for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; } else { line=test; } } if(line) lines.push(line); return lines; }
 function scHash(s){ let h=2166136261; for(let i=0;i<String(s).length;i++){ h^=String(s).charCodeAt(i); h=Math.imul(h,16777619);} return (h>>>0); }
+function scRng(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function scHexA(hex,a){ const n=parseInt(hex.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+// Generative per-quote background: 5 modes chosen by seed, tinted per era. Keeps text readable.
+function paintShareBg(ctx,W,H,pal,seed){
+  const r=scRng(seed); const mode=seed%5;
+  const ang=(seed%4)*0.6; const gx=Math.cos(ang)*W, gy=Math.sin(ang)*H;
+  const g=ctx.createLinearGradient(W/2-gx/2,H/2-gy/2,W/2+gx/2,H/2+gy/2);
+  g.addColorStop(0,pal.bg[0]); g.addColorStop(0.55,pal.bg[1]); g.addColorStop(1,pal.bg[2]);
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  if(mode===0){ for(let i=0;i<5;i++){ const x=r()*W,y=r()*H,rad=120+r()*260; const rg=ctx.createRadialGradient(x,y,0,x,y,rad); rg.addColorStop(0,scHexA(pal.accent,0.10+r()*0.07)); rg.addColorStop(1,scHexA(pal.accent,0)); ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(x,y,rad,0,Math.PI*2); ctx.fill(); } }
+  else if(mode===1){ ctx.save(); ctx.translate(W/2,H/2); ctx.rotate(-0.5+r()*1.0); ctx.translate(-W/2,-H/2); for(let i=0;i<22;i++){ const y=-100+i*(60+r()*16); ctx.globalAlpha=0.05+r()*0.05; ctx.strokeStyle=pal.accent; ctx.lineWidth=1+r()*2; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(W+100,y+(r()*40-20)); ctx.stroke(); } ctx.globalAlpha=1; ctx.restore(); }
+  else if(mode===2){ const pts=[]; const N=14+Math.floor(r()*8); for(let i=0;i<N;i++) pts.push({x:r()*W,y:r()*H}); ctx.strokeStyle=scHexA(pal.accent,0.18); ctx.lineWidth=1; for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y; if(Math.hypot(dx,dy)<220){ ctx.globalAlpha=0.5; ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke(); } } } ctx.globalAlpha=1; ctx.fillStyle=scHexA(pal.accent,0.6); pts.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,1.6+r()*1.8,0,Math.PI*2); ctx.fill(); }); }
+  else if(mode===3){ const cx=r()<0.5?0:W, cy=r()<0.5?0:H; ctx.strokeStyle=pal.accent; for(let i=1;i<=10;i++){ ctx.globalAlpha=0.07+(i%2?0.03:0); ctx.lineWidth=i%2?2:1; ctx.beginPath(); ctx.arc(cx,cy,i*(70+r()*30),0,Math.PI*2); ctx.stroke(); } ctx.globalAlpha=1; }
+  else { ctx.strokeStyle=pal.accent; for(let i=0;i<8;i++){ const baseY=100+i*120; ctx.globalAlpha=0.08; ctx.lineWidth=1.6; ctx.beginPath(); for(let x=0;x<=W;x+=20){ const y=baseY+Math.sin((x/W)*Math.PI*2*(1+r()*0.5)+i)*(20+r()*30); x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); } ctx.stroke(); } ctx.globalAlpha=1; }
+  // grain + vignette
+  ctx.globalAlpha=0.03; for(let i=0;i<2000;i++){ ctx.fillStyle='#ffffff'; ctx.fillRect(Math.random()*W,Math.random()*H,1.2,1.2);} ctx.globalAlpha=1;
+  const vg=ctx.createRadialGradient(W/2,H/2,160,W/2,H/2,H*0.72); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
 function scInitials(name){ const p=String(name).split(/\s+/).filter(Boolean); if(p.length===1) return p[0].slice(0,2).toUpperCase(); return (p[0][0]+p[p.length-1][0]).toUpperCase(); }
 function scSpacedText(ctx,text,cx,cy,gap){ let tw=0; for(const ch of text){ tw+=ctx.measureText(ch).width+gap; } let x=cx-tw/2; for(const ch of text){ const cw=ctx.measureText(ch).width; ctx.fillText(ch,x+cw/2,cy); x+=cw+gap; } }
 
@@ -1005,13 +1023,8 @@ function drawShareCard(q){
   const ctx=shareCanvas.getContext('2d'); const W=1080,H=1080;
   const pal=ERA_PALETTE[q.cat] || ERA_PALETTE['Stoicism'];
   const seed=scHash(q.author);
-  // bg gradient
-  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,pal.bg[0]); g.addColorStop(0.5,pal.bg[1]); g.addColorStop(1,pal.bg[2]);
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  // grain
-  ctx.globalAlpha=0.035; for(let i=0;i<2400;i++){ ctx.fillStyle='#ffffff'; ctx.fillRect(Math.random()*W,Math.random()*H,1.3,1.3); } ctx.globalAlpha=1;
-  // vignette
-  const rg=ctx.createRadialGradient(W/2,H/2,160,W/2,H/2,H*0.72); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.45)'); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+  // generative, per-quote background (unique per post)
+  paintShareBg(ctx,W,H,pal,scHash(q.text));
   // double frame
   ctx.strokeStyle='rgba(255,255,255,0.10)'; ctx.lineWidth=2; roundRect(ctx,46,46,W-92,H-92,30); ctx.stroke();
   ctx.strokeStyle=pal.accent; ctx.globalAlpha=0.25; ctx.lineWidth=1; roundRect(ctx,58,58,W-116,H-116,24); ctx.stroke(); ctx.globalAlpha=1;
@@ -1024,6 +1037,8 @@ function drawShareCard(q){
   ctx.fillStyle=pal.accent; ctx.font='600 19px "Space Grotesk", sans-serif'; scSpacedText(ctx,(q.cat||'').toUpperCase(),W/2,452,6);
   // divider
   ctx.strokeStyle=pal.accent; ctx.globalAlpha=0.5; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(W/2-40,480); ctx.lineTo(W/2+40,480); ctx.stroke(); ctx.globalAlpha=1;
+  // readability scrim so text stays legible over busy backgrounds
+  ctx.fillStyle='rgba(0,0,0,0.26)'; roundRect(ctx,86,536,W-172,348,18); ctx.fill();
   // quote, vertically centered in its band
   ctx.fillStyle=pal.ink;
   let fs=q.text.length>180?42:q.text.length>110?50:q.text.length>60?60:70;
