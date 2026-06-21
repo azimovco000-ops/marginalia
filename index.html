@@ -263,6 +263,76 @@
     max-height:78vh; overflow-y:auto;
   }
   .collection-sheet.show{ transform:translateY(0); }
+
+  /* ============ MUSIC ============ */
+  .icon-btn.playing{ background:rgba(201,162,75,0.16); border-color:rgba(201,162,75,0.5); }
+  .icon-btn.playing svg{ color:var(--gold); }
+  .icon-btn .eq{ position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); display:none; gap:2px; align-items:flex-end; height:7px; }
+  .icon-btn.playing .eq{ display:flex; }
+  .icon-btn .eq span{ width:2px; background:var(--gold); border-radius:1px; animation:eqBar .9s ease-in-out infinite; }
+  .icon-btn .eq span:nth-child(1){ height:4px; animation-delay:0s; }
+  .icon-btn .eq span:nth-child(2){ height:7px; animation-delay:.18s; }
+  .icon-btn .eq span:nth-child(3){ height:3px; animation-delay:.36s; }
+  @keyframes eqBar{ 0%,100%{ transform:scaleY(0.4); } 50%{ transform:scaleY(1); } }
+
+  .music-sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:21;
+    background:#15131a; border-top:1px solid rgba(244,241,234,0.12);
+    border-radius:20px 20px 0 0; padding:10px 22px max(26px, env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    max-height:80vh; overflow-y:auto;
+  }
+  .music-sheet.show{ transform:translateY(0); }
+  .music-title{ font-family:var(--serif); font-size:18px; font-weight:500; margin:6px 0 4px; }
+  .music-sub{ font-family:var(--sans); font-size:12px; color:var(--ink-faint); margin-bottom:18px; }
+  .sound-list{ display:flex; flex-direction:column; gap:2px; margin-bottom:20px; }
+  .sound-item{
+    display:flex; align-items:center; gap:13px; padding:13px 12px; border-radius:13px; cursor:pointer;
+    transition:background .15s ease; border:1px solid transparent;
+  }
+  .sound-item:hover{ background:rgba(244,241,234,0.05); }
+  .sound-item.active{ background:rgba(201,162,75,0.1); border-color:rgba(201,162,75,0.32); }
+  .sound-ico{
+    width:38px; height:38px; border-radius:11px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    background:rgba(244,241,234,0.06); border:1px solid rgba(244,241,234,0.1);
+  }
+  .sound-item.active .sound-ico{ background:rgba(201,162,75,0.16); border-color:rgba(201,162,75,0.4); }
+  .sound-meta{ flex:1; min-width:0; }
+  .sound-name{ font-family:var(--serif); font-size:16px; font-weight:500; color:var(--ink); }
+  .sound-desc{ font-family:var(--sans); font-size:11.5px; color:var(--ink-faint); margin-top:1px; }
+  .sound-state{ font-family:var(--sans); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); opacity:0; transition:opacity .2s ease; }
+  .sound-item.active .sound-state{ opacity:1; }
+
+  .music-controls{ display:flex; align-items:center; gap:14px; padding-top:18px; border-top:1px solid rgba(244,241,234,0.09); }
+  .play-toggle{
+    width:46px; height:46px; border-radius:50%; flex-shrink:0; cursor:pointer;
+    background:var(--gold); border:none; display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease, opacity .15s ease;
+  }
+  .play-toggle:active{ transform:scale(0.92); }
+  .play-toggle:disabled{ opacity:0.3; cursor:default; }
+  .play-toggle svg{ width:19px; height:19px; color:#1a1305; }
+  .vol-wrap{ flex:1; display:flex; align-items:center; gap:11px; }
+  .vol-wrap svg{ width:16px; height:16px; color:var(--ink-dim); flex-shrink:0; }
+  .vol-slider{
+    -webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:3px;
+    background:rgba(244,241,234,0.16); outline:none; cursor:pointer;
+  }
+  .vol-slider::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%;
+    background:var(--gold); cursor:pointer; border:2px solid #15131a;
+  }
+  .vol-slider::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid #15131a;
+  }
+  .music-off{
+    width:100%; margin-top:16px; background:transparent; border:1px solid rgba(244,241,234,0.18); color:var(--ink-dim);
+    font-family:var(--sans); font-size:12.5px; font-weight:500; padding:12px; border-radius:100px; cursor:pointer;
+    transition:background .15s ease;
+  }
+  .music-off:hover{ background:rgba(244,241,234,0.06); }
+
   .coll-title{ font-family:var(--serif); font-size:18px; font-weight:500; margin:6px 0 16px; }
   .coll-item{ padding:14px 0; border-bottom:1px solid rgba(244,241,234,0.08); }
   .coll-item:last-child{ border-bottom:none; }
@@ -287,6 +357,10 @@
     <span class="counter" id="counter">01 / 60</span>
   </div>
   <div class="top-right">
+    <div class="icon-btn" id="musicBtn" title="Ambient sound">
+      <svg id="musicIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      <span class="eq"><span></span><span></span><span></span></span>
+    </div>
     <div class="icon-btn" id="filterBtn" title="Filter by theme">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
     </div>
@@ -325,6 +399,23 @@
   <div class="sheet-handle"></div>
   <div class="coll-title">Saved</div>
   <div id="collectionList"></div>
+</div>
+
+<div class="music-sheet" id="musicSheet">
+  <div class="sheet-handle"></div>
+  <div class="music-title">Ambient sound</div>
+  <div class="music-sub">A quiet backdrop for reading. Plays as you scroll.</div>
+  <div class="sound-list" id="soundList"></div>
+  <div class="music-controls">
+    <button class="play-toggle" id="playToggle" disabled>
+      <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div class="vol-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg>
+      <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="55">
+    </div>
+  </div>
+  <button class="music-off" id="musicOff">Turn off sound</button>
 </div>
 
 <script>
@@ -498,7 +589,7 @@ function trackView(){ viewedThisSession++; if(viewedThisSession === SESSION_CAP 
 function insertNudgeCard(){ if(document.getElementById('nudgeCardEl')) return; const nudge = document.createElement('div'); nudge.className = 'card era-rome nudge-card'; nudge.id = 'nudgeCardEl'; nudge.innerHTML = `<div class="card-bg">${ERAS['Stoicism'].bg(95)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="nudge-icon">⏸</div><div class="nudge-title">You've read ${SESSION_CAP} today.</div><div class="nudge-sub">That's a good stopping point. If one of these stuck with you, maybe go find the book it came from — that's where the rest of the thinking lives.</div><div class="nudge-actions"><button class="nudge-btn primary" id="nudgeCollection">See what you saved</button><button class="nudge-btn ghost" id="nudgeContinue">Keep scrolling</button></div></div>`; const inView = document.querySelector('.card.in-view'); if(inView && inView.nextSibling){ feed.insertBefore(nudge, inView.nextSibling); } else { feed.appendChild(nudge); } observer.observe(nudge); nudge.querySelector('#nudgeContinue').addEventListener('click', ()=>{ const next = nudge.nextElementSibling; if(next) next.scrollIntoView({behavior:'smooth'}); }); nudge.querySelector('#nudgeCollection').addEventListener('click', openCollectionSheet); }
 function updateProgress(idx){ const total = deck.length; counter.textContent = String(Math.min(idx+1,total)).padStart(2,'0') + ' / ' + String(total).padStart(2,'0'); document.querySelectorAll('.rail-seg').forEach((seg,i)=>{ seg.classList.toggle('done', i <= idx); }); }
 const sheetBackdrop = document.getElementById('sheetBackdrop'); const contextSheet = document.getElementById('contextSheet'); function openContextSheet(q){ document.getElementById('sheetAuthor').textContent = q.author; document.getElementById('sheetSource').textContent = q.source; document.getElementById('sheetContext').textContent = q.context || 'No further context noted for this one yet.'; const link = document.getElementById('sheetLink'); if(q.link){ link.href = q.link; link.style.display = 'inline-flex'; } else { link.style.display = 'none'; } sheetBackdrop.classList.add('show'); contextSheet.classList.add('show'); }
-function closeSheets(){ sheetBackdrop.classList.remove('show'); contextSheet.classList.remove('show'); filterSheet.classList.remove('show'); collectionSheet.classList.remove('show'); }
+function closeSheets(){ sheetBackdrop.classList.remove('show'); contextSheet.classList.remove('show'); filterSheet.classList.remove('show'); collectionSheet.classList.remove('show'); musicSheet.classList.remove('show'); }
 sheetBackdrop.addEventListener('click', closeSheets);
 const filterBtn = document.getElementById('filterBtn'); const filterSheet = document.getElementById('filterSheet'); const filterGrid = document.getElementById('filterGrid'); CATEGORIES.forEach(cat=>{ const chip = document.createElement('button'); chip.className = 'chip active'; chip.innerHTML = `<span class="chip-dot" style="background:${ERAS[cat].dot}"></span>${cat}`; chip.dataset.cat = cat; chip.addEventListener('click', ()=>{ if(activeCategories.has(cat)){ if(activeCategories.size > 1){ activeCategories.delete(cat); chip.classList.remove('active'); } } else { activeCategories.add(cat); chip.classList.add('active'); } }); filterGrid.appendChild(chip); }); filterBtn.addEventListener('click', ()=>{ sheetBackdrop.classList.add('show'); filterSheet.classList.add('show'); }); document.getElementById('filterApply').addEventListener('click', ()=>{ closeSheets(); buildDeck(); });
 const collectionBtn = document.getElementById('collectionBtn'); const collectionSheet = document.getElementById('collectionSheet'); const collectionList = document.getElementById('collectionList'); function openCollectionSheet(){ renderCollectionList(); sheetBackdrop.classList.add('show'); collectionSheet.classList.add('show'); }
@@ -506,7 +597,162 @@ function renderCollectionList(){ const saved = getSaved(); if(saved.length === 0
 collectionBtn.addEventListener('click', openCollectionSheet);
 let holdTimer = null; let isHolding = false; function startHold(e){ if(e.target.closest('.restart-btn, .save-btn, .source, .nudge-btn, .icon-btn')) return; holdTimer = setTimeout(()=>{ isHolding = true; document.body.classList.add('holding'); dimOverlay.classList.add('active'); feed.style.scrollSnapType = 'none'; if(navigator.vibrate) navigator.vibrate(8); }, 280); } function endHold(){ clearTimeout(holdTimer); if(isHolding){ isHolding = false; document.body.classList.remove('holding'); dimOverlay.classList.remove('active'); feed.style.scrollSnapType = 'y mandatory'; } }
 feed.addEventListener('pointerdown', startHold); feed.addEventListener('pointerup', endHold); feed.addEventListener('pointerleave', endHold); feed.addEventListener('pointercancel', endHold);
-document.addEventListener('keydown', (e)=>{ if(contextSheet.classList.contains('show') || filterSheet.classList.contains('show') || collectionSheet.classList.contains('show')){ if(e.key === 'Escape') closeSheets(); return; } const cards = Array.from(document.querySelectorAll('.card')); if(e.key === 'ArrowDown' || e.key === ' '){ e.preventDefault(); cards[Math.min(currentIndex+1, cards.length-1)].scrollIntoView({behavior:'smooth'}); } else if(e.key === 'ArrowUp'){ e.preventDefault(); cards[Math.max(currentIndex-1, 0)].scrollIntoView({behavior:'smooth'}); } });
+document.addEventListener('keydown', (e)=>{ if(contextSheet.classList.contains('show') || filterSheet.classList.contains('show') || collectionSheet.classList.contains('show') || musicSheet.classList.contains('show')){ if(e.key === 'Escape') closeSheets(); return; } const cards = Array.from(document.querySelectorAll('.card')); if(e.key === 'ArrowDown' || e.key === ' '){ e.preventDefault(); cards[Math.min(currentIndex+1, cards.length-1)].scrollIntoView({behavior:'smooth'}); } else if(e.key === 'ArrowUp'){ e.preventDefault(); cards[Math.max(currentIndex-1, 0)].scrollIntoView({behavior:'smooth'}); } });
+
+/* ============================================================
+   AMBIENT MUSIC ENGINE
+   Sounds are synthesized live with the Web Audio API, so they
+   always work with no files, network, or broken links.
+
+   >>> WANT REAL RECORDED AUDIO INSTEAD? <<<
+   Drop an MP3 URL into the `url` field of any sound below
+   (e.g. from pixabay.com/music or your own host). If a url is
+   present it plays that file on loop instead of the synth.
+   ============================================================ */
+const MUSIC_KEY = 'marginalia_music_pref';
+const SOUNDS = [
+  { id:'silence',   name:'Silence',      desc:'No sound (default)', icon:'∅',  url:null },
+  { id:'rain',      name:'Forest Rain',  desc:'Soft rainfall',      icon:'🌧',  url:null },
+  { id:'waves',     name:'Ocean Waves',  desc:'Slow tide',          icon:'🌊', url:null },
+  { id:'piano',     name:'Gentle Piano', desc:'Sparse, drifting',   icon:'🎹', url:null },
+  { id:'pad',       name:'Ambient Pad',  desc:'Warm drone',         icon:'🎛', url:null },
+  { id:'fire',      name:'Fireplace',    desc:'Crackling embers',   icon:'🔥', url:null },
+];
+
+const musicBtn   = document.getElementById('musicBtn');
+const musicSheet = document.getElementById('musicSheet');
+const musicIcon  = document.getElementById('musicIcon');
+const soundList  = document.getElementById('soundList');
+const playToggle = document.getElementById('playToggle');
+const playIcon   = document.getElementById('playIcon');
+const volSlider  = document.getElementById('volSlider');
+const musicOff   = document.getElementById('musicOff');
+
+const ICON_SPEAKER = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>';
+const ICON_SOUNDON = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/>';
+const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+const ICON_PAUSE = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+
+let musicState = { sound:'silence', volume:55, playing:false };
+try { const saved = JSON.parse(localStorage.getItem(MUSIC_KEY) || 'null'); if(saved){ musicState = Object.assign(musicState, saved); } } catch(e){}
+function saveMusicPref(){ try { localStorage.setItem(MUSIC_KEY, JSON.stringify(musicState)); } catch(e){} }
+
+// ---- Web Audio synthesis ----
+let actx = null, masterGain = null, activeNodes = [], htmlAudio = null, pianoTimer = null;
+function ensureCtx(){
+  if(!actx){
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = actx.createGain();
+    masterGain.gain.value = musicState.volume/100;
+    masterGain.connect(actx.destination);
+  }
+  if(actx.state === 'suspended') actx.resume();
+}
+function noiseBuffer(){
+  const len = actx.sampleRate * 2;
+  const buf = actx.createBuffer(1, len, actx.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+  return buf;
+}
+function stopSynth(){
+  activeNodes.forEach(n=>{ try{ n.stop ? n.stop() : n.disconnect(); }catch(e){} });
+  activeNodes = [];
+  if(pianoTimer){ clearInterval(pianoTimer); pianoTimer = null; }
+}
+function startSynth(id){
+  stopSynth();
+  ensureCtx();
+  if(id === 'rain'){
+    const src = actx.createBufferSource(); src.buffer = noiseBuffer(); src.loop = true;
+    const hp = actx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=900;
+    const lp = actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=7000;
+    const g = actx.createGain(); g.gain.value=0.5;
+    src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(masterGain); src.start();
+    activeNodes=[src,hp,lp,g];
+  } else if(id === 'waves'){
+    const src = actx.createBufferSource(); src.buffer = noiseBuffer(); src.loop = true;
+    const lp = actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=600;
+    const g = actx.createGain(); g.gain.value=0.05;
+    const lfo = actx.createOscillator(); lfo.frequency.value=0.13;
+    const lfoG = actx.createGain(); lfoG.gain.value=0.42;
+    lfo.connect(lfoG); lfoG.connect(g.gain);
+    src.connect(lp); lp.connect(g); g.connect(masterGain); src.start(); lfo.start();
+    activeNodes=[src,lp,g,lfo,lfoG];
+  } else if(id === 'fire'){
+    const src = actx.createBufferSource(); src.buffer = noiseBuffer(); src.loop = true;
+    const lp = actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1600;
+    const g = actx.createGain(); g.gain.value=0.18;
+    src.connect(lp); lp.connect(g); g.connect(masterGain); src.start();
+    // crackle
+    const crackle = setInterval(()=>{ if(!actx) return; const c=actx.createBufferSource(); const b=actx.createBuffer(1,actx.sampleRate*0.05,actx.sampleRate); const d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3); c.buffer=b; const cg=actx.createGain(); cg.gain.value=0.4+Math.random()*0.5; c.connect(cg); cg.connect(masterGain); c.start(); }, 140);
+    activeNodes=[src,lp,g,{disconnect:()=>clearInterval(crackle)}];
+  } else if(id === 'pad'){
+    const freqs=[110,164.81,220,277.18];
+    freqs.forEach(f=>{ const o=actx.createOscillator(); o.type='sine'; o.frequency.value=f; const g=actx.createGain(); g.gain.value=0.08; const lfo=actx.createOscillator(); lfo.frequency.value=0.05+Math.random()*0.08; const lg=actx.createGain(); lg.gain.value=0.03; lfo.connect(lg); lg.connect(g.gain); o.connect(g); g.connect(masterGain); o.start(); lfo.start(); activeNodes.push(o,g,lfo,lg); });
+  } else if(id === 'piano'){
+    const scale=[261.63,293.66,329.63,392.00,440.00,523.25];
+    const playNote=()=>{ if(!actx) return; const f=scale[Math.floor(Math.random()*scale.length)]; const o=actx.createOscillator(); o.type='triangle'; o.frequency.value=f; const g=actx.createGain(); const now=actx.currentTime; g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(0.22,now+0.02); g.gain.exponentialRampToValueAtTime(0.001,now+2.6); o.connect(g); g.connect(masterGain); o.start(now); o.stop(now+2.8); };
+    playNote(); pianoTimer=setInterval(()=>{ if(Math.random()>0.25) playNote(); }, 1500);
+  }
+}
+function startHtmlAudio(url){
+  stopSynth();
+  if(!htmlAudio){ htmlAudio = new Audio(); htmlAudio.loop = true; }
+  htmlAudio.src = url; htmlAudio.volume = musicState.volume/100;
+  htmlAudio.play().catch(()=>{});
+}
+function stopHtmlAudio(){ if(htmlAudio){ htmlAudio.pause(); } }
+
+function applyPlayback(){
+  const s = SOUNDS.find(x=>x.id===musicState.sound);
+  stopSynth(); stopHtmlAudio();
+  const isAudible = musicState.playing && musicState.sound !== 'silence';
+  if(isAudible){
+    if(s && s.url){ startHtmlAudio(s.url); }
+    else { startSynth(musicState.sound); }
+  }
+  // button state
+  musicBtn.classList.toggle('playing', isAudible);
+  musicIcon.innerHTML = isAudible ? ICON_SOUNDON : ICON_SPEAKER;
+  playIcon.innerHTML = musicState.playing ? ICON_PAUSE : ICON_PLAY;
+  playToggle.disabled = (musicState.sound === 'silence');
+}
+function setVolume(v){
+  musicState.volume = v;
+  if(masterGain) masterGain.gain.value = v/100;
+  if(htmlAudio) htmlAudio.volume = v/100;
+  saveMusicPref();
+}
+
+function renderSoundList(){
+  soundList.innerHTML = SOUNDS.map(s=>`
+    <div class="sound-item ${s.id===musicState.sound?'active':''}" data-id="${s.id}">
+      <div class="sound-ico">${s.icon}</div>
+      <div class="sound-meta"><div class="sound-name">${s.name}</div><div class="sound-desc">${s.desc}</div></div>
+      <div class="sound-state">${s.id===musicState.sound && musicState.playing && s.id!=='silence' ? 'Playing' : (s.id===musicState.sound?'Selected':'')}</div>
+    </div>`).join('');
+  soundList.querySelectorAll('.sound-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      musicState.sound = el.dataset.id;
+      musicState.playing = (el.dataset.id !== 'silence');
+      saveMusicPref(); applyPlayback(); renderSoundList();
+    });
+  });
+}
+
+musicBtn.addEventListener('click', ()=>{ renderSoundList(); volSlider.value = musicState.volume; sheetBackdrop.classList.add('show'); musicSheet.classList.add('show'); });
+playToggle.addEventListener('click', ()=>{ if(musicState.sound==='silence') return; musicState.playing = !musicState.playing; saveMusicPref(); applyPlayback(); renderSoundList(); });
+volSlider.addEventListener('input', (e)=>{ setVolume(parseInt(e.target.value,10)); });
+musicOff.addEventListener('click', ()=>{ musicState.sound='silence'; musicState.playing=false; saveMusicPref(); applyPlayback(); renderSoundList(); });
+
+// Restore button visual on load (audio itself needs a user gesture to start,
+// so if a sound was playing last session it resumes on first interaction).
+applyPlayback();
+let _resumeOnce = false;
+function resumeAudioOnce(){ if(_resumeOnce) return; _resumeOnce = true; if(musicState.playing && musicState.sound!=='silence'){ applyPlayback(); } document.removeEventListener('pointerdown', resumeAudioOnce); }
+document.addEventListener('pointerdown', resumeAudioOnce);
+
 buildDeck();
 </script>
 </body>
