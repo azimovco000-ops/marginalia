@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Marginalia</title>
+<meta name="theme-color" content="#08080a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Marginalia">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=Noto+Serif+JP:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -140,6 +145,57 @@
   }
   .save-pop.show{ animation:popUp 1.1s ease forwards; }
   @keyframes popUp{ 0%{opacity:0; transform:translateY(4px);} 20%{opacity:1; transform:translateY(0);} 80%{opacity:1;} 100%{opacity:0; transform:translateY(-6px);} }
+
+  /* ===== card action row (share / copy / narrate alongside save) ===== */
+  .action-stack{ display:flex; flex-direction:column; gap:9px; align-items:center; }
+  .mini-btn{
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(244,241,234,0.07); border:1px solid rgba(244,241,234,0.16);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+    transition:background .15s ease, transform .15s ease, border-color .15s ease; backdrop-filter:blur(6px);
+  }
+  .mini-btn svg{ width:15px; height:15px; color:var(--ink); }
+  .mini-btn:active{ transform:scale(0.9); }
+  .mini-btn:hover{ background:rgba(244,241,234,0.14); }
+  .mini-btn.active{ background:rgba(201,162,75,0.18); border-color:rgba(201,162,75,0.55); }
+  .mini-btn.active svg{ color:var(--gold); }
+
+  /* ===== toast ===== */
+  .toast{
+    position:fixed; bottom:max(90px, calc(env(safe-area-inset-bottom) + 70px)); left:50%; transform:translateX(-50%) translateY(12px);
+    background:rgba(20,18,24,0.95); border:1px solid rgba(201,162,75,0.4); color:var(--ink);
+    font-family:var(--sans); font-size:12.5px; padding:11px 18px; border-radius:100px; z-index:40;
+    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; backdrop-filter:blur(8px); white-space:nowrap;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ===== share modal ===== */
+  .share-modal{
+    position:fixed; inset:0; z-index:30; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .share-modal.show{ opacity:1; pointer-events:auto; }
+  .share-inner{ display:flex; flex-direction:column; align-items:center; gap:18px; max-width:380px; width:100%; }
+  .share-canvas-wrap{ width:100%; border-radius:18px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.5); transform:scale(0.94); transition:transform .3s cubic-bezier(.2,.8,.2,1); }
+  .share-modal.show .share-canvas-wrap{ transform:scale(1); }
+  .share-canvas-wrap canvas{ width:100%; display:block; }
+  .share-actions{ display:flex; gap:10px; width:100%; }
+  .share-act{
+    flex:1; font-family:var(--sans); font-size:12.5px; font-weight:600; padding:13px; border-radius:100px; cursor:pointer;
+    border:1px solid rgba(244,241,234,0.22); background:rgba(244,241,234,0.08); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; gap:7px; transition:background .15s ease;
+  }
+  .share-act svg{ width:14px; height:14px; }
+  .share-act.primary{ background:var(--gold); color:#1a1305; border:none; }
+  .share-act:hover{ background:rgba(244,241,234,0.16); }
+  .share-act.primary:hover{ background:#d4af5a; }
+  .share-close{ font-family:var(--sans); font-size:12px; color:var(--ink-faint); background:none; border:none; cursor:pointer; padding:4px; }
+
+  /* ===== daily card ===== */
+  .daily-card .quote-wrap{ text-align:center; }
+  .daily-badge{ font-family:var(--sans); font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; display:flex; align-items:center; gap:8px; justify-content:center; }
+  .daily-badge .streak-pill{ background:rgba(201,162,75,0.16); border:1px solid rgba(201,162,75,0.4); border-radius:100px; padding:3px 10px; color:var(--gold); letter-spacing:0.04em; }
+  .daily-date{ font-family:var(--sans); font-size:11.5px; color:var(--ink-faint); margin-top:16px; letter-spacing:0.04em; }
 
   .rail{
     position:fixed; top:0; left:0; right:0; height:3px; z-index:10;
@@ -334,6 +390,89 @@
   .music-off:hover{ background:rgba(244,241,234,0.06); }
 
   .coll-title{ font-family:var(--serif); font-size:18px; font-weight:500; margin:6px 0 16px; }
+
+  /* ===== Wave 2: discover (search + decks + authors) ===== */
+  .discover-sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:21;
+    background:#15131a; border-top:1px solid rgba(244,241,234,0.12);
+    border-radius:20px 20px 0 0; padding:10px 22px max(26px, env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    max-height:84vh; overflow-y:auto;
+  }
+  .discover-sheet.show{ transform:translateY(0); }
+  .disc-tabs{ display:flex; gap:6px; margin:4px 0 16px; }
+  .disc-tab{ font-family:var(--sans); font-size:12.5px; font-weight:500; padding:8px 15px; border-radius:100px; cursor:pointer; border:1px solid rgba(244,241,234,0.18); background:transparent; color:var(--ink-dim); transition:all .15s ease; }
+  .disc-tab.active{ background:var(--gold); border-color:var(--gold); color:#1a1305; font-weight:600; }
+  .disc-search{ width:100%; font-family:var(--sans); font-size:14px; color:var(--ink); background:rgba(244,241,234,0.07); border:1px solid rgba(244,241,234,0.18); border-radius:13px; padding:13px 15px; outline:none; margin-bottom:14px; }
+  .disc-search::placeholder{ color:var(--ink-faint); }
+  .disc-search:focus{ border-color:rgba(201,162,75,0.5); }
+  .disc-panel{ display:none; } .disc-panel.active{ display:block; }
+  .search-result{ padding:13px 4px; border-bottom:1px solid rgba(244,241,234,0.08); cursor:pointer; transition:opacity .15s ease; }
+  .search-result:hover{ opacity:0.75; }
+  .search-result-text{ font-family:var(--serif); font-size:15px; line-height:1.45; color:var(--ink); margin-bottom:5px; }
+  .search-result-meta{ font-family:var(--sans); font-size:11.5px; color:var(--gold); }
+  .search-empty{ font-family:var(--sans); font-size:13px; color:var(--ink-faint); text-align:center; padding:30px 0; line-height:1.6; }
+  .deck-card{ padding:16px; border-radius:14px; border:1px solid rgba(244,241,234,0.12); margin-bottom:10px; cursor:pointer; transition:all .15s ease; background:rgba(244,241,234,0.03); }
+  .deck-card:hover{ background:rgba(244,241,234,0.06); border-color:rgba(201,162,75,0.35); }
+  .deck-card-title{ font-family:var(--serif); font-size:17px; font-weight:500; margin-bottom:4px; }
+  .deck-card-desc{ font-family:var(--sans); font-size:12px; color:var(--ink-dim); line-height:1.5; }
+  .deck-card-count{ font-family:var(--sans); font-size:10.5px; color:var(--gold); margin-top:7px; letter-spacing:0.06em; text-transform:uppercase; }
+  .author-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 4px; border-bottom:1px solid rgba(244,241,234,0.08); cursor:pointer; }
+  .author-row:hover{ opacity:0.75; }
+  .author-name{ font-family:var(--serif); font-size:15.5px; color:var(--ink); }
+  .author-count{ font-family:var(--sans); font-size:11px; color:var(--ink-faint); }
+
+  /* ===== Wave 2: sepia / light reading mode ===== */
+  body.sepia{ background:#e8e0d0; }
+  body.sepia .card-vignette{ background: radial-gradient(ellipse 120% 70% at 50% 100%, rgba(120,100,70,0.18), transparent 60%); }
+  body.sepia .era-rome, body.sepia .era-void, body.sepia .era-lit, body.sepia .era-mind, body.sepia .era-east,
+  body.sepia [class*="era-"]{ background:linear-gradient(180deg,#efe7d6 0%,#e3d8c2 55%,#d8cbb0 100%) !important; }
+  body.sepia .quote-text{ color:#2a2418 !important; }
+  body.sepia .author{ color:#3a3122 !important; }
+  body.sepia .source{ color:#7a6648 !important; }
+  body.sepia .eyebrow{ color:#9a7b3c !important; }
+  body.sepia .card-bg{ opacity:0.35; }
+  body.sepia .save-btn, body.sepia .mini-btn{ background:rgba(60,48,30,0.08); border-color:rgba(60,48,30,0.2); }
+  body.sepia .save-btn svg, body.sepia .mini-btn svg{ color:#3a3122; }
+  body.sepia .brand, body.sepia .counter{ color:#3a3122; }
+  body.sepia .icon-btn{ background:rgba(60,48,30,0.08); border-color:rgba(60,48,30,0.2); }
+  body.sepia .icon-btn svg{ color:#3a3122; }
+  body.sepia .rail-seg{ background:rgba(60,48,30,0.18); }
+  body.sepia .rail-seg-fill{ background:rgba(60,48,30,0.7); }
+
+  /* ===== Wave 3: compose / my quotes / install ===== */
+  .compose-modal{
+    position:fixed; inset:0; z-index:30; display:flex; align-items:flex-end; justify-content:center;
+    background:rgba(0,0,0,0.6); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .compose-modal.show{ opacity:1; pointer-events:auto; }
+  .compose-inner{
+    width:100%; max-width:560px; background:#15131a; border-top:1px solid rgba(244,241,234,0.12);
+    border-radius:20px 20px 0 0; padding:10px 24px max(26px, env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1); max-height:88vh; overflow-y:auto;
+  }
+  .compose-modal.show .compose-inner{ transform:translateY(0); }
+  .compose-title{ font-family:var(--serif); font-size:18px; font-weight:500; margin:6px 0 16px; }
+  .compose-field{ margin-bottom:13px; }
+  .compose-field label{ font-family:var(--sans); font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); display:block; margin-bottom:6px; }
+  .compose-field textarea, .compose-field input{
+    width:100%; font-family:var(--serif); font-size:15px; color:var(--ink); background:rgba(244,241,234,0.07);
+    border:1px solid rgba(244,241,234,0.18); border-radius:12px; padding:12px 14px; outline:none; resize:vertical;
+  }
+  .compose-field textarea{ min-height:90px; line-height:1.5; }
+  .compose-field input{ font-family:var(--sans); font-size:14px; }
+  .compose-field textarea:focus, .compose-field input:focus{ border-color:rgba(201,162,75,0.5); }
+  .compose-save{ width:100%; background:var(--gold); color:#1a1305; border:none; font-family:var(--sans); font-size:13px; font-weight:600; padding:14px; border-radius:100px; cursor:pointer; margin-top:6px; }
+  .compose-cancel{ width:100%; background:transparent; border:none; color:var(--ink-faint); font-family:var(--sans); font-size:12.5px; padding:12px; cursor:pointer; margin-top:4px; }
+  .coll-add-btn{
+    display:flex; align-items:center; gap:8px; width:100%; justify-content:center;
+    font-family:var(--sans); font-size:12.5px; font-weight:500; color:var(--ink);
+    background:rgba(244,241,234,0.06); border:1px dashed rgba(244,241,234,0.25); border-radius:13px;
+    padding:13px; cursor:pointer; margin-bottom:16px; transition:background .15s ease;
+  }
+  .coll-add-btn:hover{ background:rgba(244,241,234,0.1); }
+  .coll-add-btn svg{ width:15px; height:15px; }
+  .coll-mine-badge{ font-family:var(--sans); font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); border:1px solid rgba(201,162,75,0.4); border-radius:100px; padding:2px 7px; margin-left:8px; }
   .coll-item{ padding:14px 0; border-bottom:1px solid rgba(244,241,234,0.08); }
   .coll-item:last-child{ border-bottom:none; }
   .coll-item-text{ font-family:var(--serif); font-size:15px; line-height:1.45; margin-bottom:8px; }
@@ -357,6 +496,15 @@
     <span class="counter" id="counter">01 / 60</span>
   </div>
   <div class="top-right">
+    <div class="icon-btn" id="discoverBtn" title="Search & explore">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="icon-btn" id="themeBtn" title="Reading mode">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </div>
+    <div class="icon-btn" id="surpriseBtn" title="Surprise me">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+    </div>
     <div class="icon-btn" id="musicBtn" title="Ambient sound">
       <svg id="musicIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
       <span class="eq"><span></span><span></span><span></span></span>
@@ -416,6 +564,46 @@
     </div>
   </div>
   <button class="music-off" id="musicOff">Turn off sound</button>
+</div>
+
+<div class="share-modal" id="shareModal">
+  <div class="share-inner">
+    <div class="share-canvas-wrap"><canvas id="shareCanvas" width="1080" height="1080"></canvas></div>
+    <div class="share-actions">
+      <button class="share-act primary" id="shareDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Save image</button>
+      <button class="share-act" id="shareNative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>
+    </div>
+    <button class="share-close" id="shareClose">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="discover-sheet" id="discoverSheet">
+  <div class="sheet-handle"></div>
+  <div class="disc-tabs">
+    <button class="disc-tab active" data-panel="search">Search</button>
+    <button class="disc-tab" data-panel="decks">Decks</button>
+    <button class="disc-tab" data-panel="authors">Authors</button>
+  </div>
+  <div class="disc-panel active" id="panel-search">
+    <input type="text" class="disc-search" id="discSearch" placeholder="Search quotes, authors, books…">
+    <div id="searchResults"></div>
+  </div>
+  <div class="disc-panel" id="panel-decks"><div id="deckList"></div></div>
+  <div class="disc-panel" id="panel-authors"><div id="authorList"></div></div>
+</div>
+
+<div class="compose-modal" id="composeModal">
+  <div class="compose-inner">
+    <div class="sheet-handle"></div>
+    <div class="compose-title">Add your own</div>
+    <div class="compose-field"><label>Quote</label><textarea id="cQuote" placeholder="The line you want to keep…"></textarea></div>
+    <div class="compose-field"><label>Author</label><input id="cAuthor" placeholder="Who said or wrote it"></div>
+    <div class="compose-field"><label>Source <span style="text-transform:none;opacity:0.6;">(optional)</span></label><input id="cSource" placeholder="Book, talk, or where you found it"></div>
+    <button class="compose-save" id="composeSave">Save to collection</button>
+    <button class="compose-cancel" id="composeCancel">Cancel</button>
+  </div>
 </div>
 
 <script>
@@ -582,22 +770,23 @@ function shuffle(arr){ const a = [...arr]; for(let i=a.length-1;i>0;i--){ const 
 function sizeForLength(len){ if(len > 140) return 21; if(len > 90) return 26; if(len > 50) return 32; return 39; }
 function svgBookmark(filled){ return `<svg viewBox="0 0 24 24" fill="${filled?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>`; }
 function buildDeck(){ const filtered = QUOTES.filter(q => activeCategories.has(q.cat)); deck = shuffle(filtered.length ? filtered : QUOTES); renderDeck(); }
-function renderDeck(){ feed.innerHTML = ''; rail.innerHTML = ''; const total = deck.length; deck.forEach((_, i)=>{ const seg = document.createElement('div'); seg.className = 'rail-seg'; seg.id = 'seg-'+i; seg.innerHTML = '<div class="rail-seg-fill"></div>'; rail.appendChild(seg); }); deck.forEach((q, i)=>{ const era = ERAS[q.cat]; const card = document.createElement('div'); card.className = 'card ' + era.cls; card.dataset.index = i; const fontSize = sizeForLength(q.text.length); const saved = isSaved(q); const seed = (i*7 + 13) % 89; card.innerHTML = `<div class="card-bg">${era.bg(seed)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="eyebrow">${era.eyebrow}</div><div class="quote-text" style="font-size:${fontSize}px;">${q.text}</div><div class="attribution"><div class="attr-left"><div class="attr-line"></div><div class="author">${q.author}</div><div class="source" data-idx="${i}">${q.source}${q.context ? ' <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>' : ''}</div></div><div style="position:relative;"><span class="save-pop" id="pop-${i}">Saved</span><div class="save-btn ${saved?'saved':''}" data-idx="${i}">${svgBookmark(saved)}</div></div></div></div>${i===0 ? '<div class="sit-hint"><span class="ring"></span>Hold to sit with it</div>' : ''}`; feed.appendChild(card); }); const endCard = document.createElement('div'); endCard.className = 'card era-mind end-card'; endCard.dataset.index = total; endCard.innerHTML = `<div class="card-bg">${ERAS['Psychology'].bg(91)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="end-icon">·  ·  ·</div><div class="end-title">That's the deck.</div><div class="end-sub">${total} lines from minds that thought hard about how to live. Worth rereading slower than you scrolled it.</div><button class="restart-btn" id="restartBtn">Shuffle &amp; start over</button></div>`; feed.appendChild(endCard); attachCardListeners(); setupObserver(); updateProgress(0); updateSavedBadge(); feed.scrollTo({top:0, behavior:'instant'}); }
-function attachCardListeners(){ document.querySelectorAll('.save-btn').forEach(btn=>{ btn.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(btn.dataset.idx, 10); const q = deck[idx]; const nowSaved = toggleSaved(q); btn.classList.toggle('saved', nowSaved); btn.innerHTML = svgBookmark(nowSaved); if(nowSaved){ const pop = document.getElementById('pop-'+idx); pop.classList.remove('show'); void pop.offsetWidth; pop.classList.add('show'); } }); }); document.querySelectorAll('.source[data-idx]').forEach(el=>{ el.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(el.dataset.idx, 10); openContextSheet(deck[idx]); }); }); document.getElementById('restartBtn')?.addEventListener('click', ()=>{ buildDeck(); }); }
+function buildDeckFrom(list, doShuffle){ deck = doShuffle ? shuffle(list) : [...list]; if(!deck.length) deck=[...QUOTES]; renderDeck(); }
+function renderDeck(){ feed.innerHTML = ''; rail.innerHTML = ''; const total = deck.length; deck.forEach((_, i)=>{ const seg = document.createElement('div'); seg.className = 'rail-seg'; seg.id = 'seg-'+i; seg.innerHTML = '<div class="rail-seg-fill"></div>'; rail.appendChild(seg); }); deck.forEach((q, i)=>{ const era = ERAS[q.cat]; const card = document.createElement('div'); card.className = 'card ' + era.cls; card.dataset.index = i; const fontSize = sizeForLength(q.text.length); const saved = isSaved(q); const seed = (i*7 + 13) % 89; card.innerHTML = `<div class="card-bg">${era.bg(seed)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="eyebrow">${era.eyebrow}</div><div class="quote-text" style="font-size:${fontSize}px;">${q.text}</div><div class="attribution"><div class="attr-left"><div class="attr-line"></div><div class="author">${q.author}</div><div class="source" data-idx="${i}">${q.source}${q.context ? ' <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>' : ''}</div></div><div style="position:relative;"><span class="save-pop" id="pop-${i}">Saved</span><div class="action-stack"><div class="save-btn ${saved?'saved':''}" data-idx="${i}">${svgBookmark(saved)}</div><div class="mini-btn share-btn" data-idx="${i}" title="Share as image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div><div class="mini-btn copy-btn" data-idx="${i}" title="Copy text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div><div class="mini-btn narrate-btn" data-idx="${i}" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div></div></div></div></div>${i===0 ? '<div class="sit-hint"><span class="ring"></span>Hold to sit with it</div>' : ''}`; feed.appendChild(card); }); const endCard = document.createElement('div'); endCard.className = 'card era-mind end-card'; endCard.dataset.index = total; endCard.innerHTML = `<div class="card-bg">${ERAS['Psychology'].bg(91)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="end-icon">·  ·  ·</div><div class="end-title">That's the deck.</div><div class="end-sub">${total} lines from minds that thought hard about how to live. Worth rereading slower than you scrolled it.</div><button class="restart-btn" id="restartBtn">Shuffle &amp; start over</button></div>`; feed.appendChild(endCard); attachCardListeners(); setupObserver(); updateProgress(0); updateSavedBadge(); feed.scrollTo({top:0, behavior:'instant'}); }
+function attachCardListeners(){ document.querySelectorAll('.save-btn').forEach(btn=>{ btn.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(btn.dataset.idx, 10); const q = deck[idx]; const nowSaved = toggleSaved(q); btn.classList.toggle('saved', nowSaved); btn.innerHTML = svgBookmark(nowSaved); if(nowSaved){ const pop = document.getElementById('pop-'+idx); pop.classList.remove('show'); void pop.offsetWidth; pop.classList.add('show'); } }); }); document.querySelectorAll('.share-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); openShare(deck[parseInt(btn.dataset.idx,10)]); }); }); document.querySelectorAll('.copy-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const q=deck[parseInt(btn.dataset.idx,10)]; copyQuote(q); }); }); document.querySelectorAll('.narrate-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); narrateQuote(deck[parseInt(btn.dataset.idx,10)], btn); }); }); document.querySelectorAll('.source[data-idx]').forEach(el=>{ el.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(el.dataset.idx, 10); openContextSheet(deck[idx]); }); }); document.getElementById('restartBtn')?.addEventListener('click', ()=>{ buildDeck(); }); }
 let currentIndex = 0; let observer = null; function setupObserver(){ if(observer) observer.disconnect(); const cards = Array.from(document.querySelectorAll('.card')); observer = new IntersectionObserver((entries)=>{ entries.forEach(entry=>{ const idx = parseInt(entry.target.dataset.index ?? '-1', 10); if(entry.isIntersecting && entry.intersectionRatio > 0.6){ cards.forEach(c=>c.classList.remove('in-view')); entry.target.classList.add('in-view'); if(!isNaN(idx) && idx >= 0){ if(idx > currentIndex) trackView(); currentIndex = idx; updateProgress(idx); } } }); }, { threshold:[0.6] }); cards.forEach(c=>observer.observe(c)); }
 function trackView(){ viewedThisSession++; if(viewedThisSession === SESSION_CAP && !nudgeShown){ nudgeShown = true; setTimeout(insertNudgeCard, 900); } }
 function insertNudgeCard(){ if(document.getElementById('nudgeCardEl')) return; const nudge = document.createElement('div'); nudge.className = 'card era-rome nudge-card'; nudge.id = 'nudgeCardEl'; nudge.innerHTML = `<div class="card-bg">${ERAS['Stoicism'].bg(95)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="nudge-icon">⏸</div><div class="nudge-title">You've read ${SESSION_CAP} today.</div><div class="nudge-sub">That's a good stopping point. If one of these stuck with you, maybe go find the book it came from — that's where the rest of the thinking lives.</div><div class="nudge-actions"><button class="nudge-btn primary" id="nudgeCollection">See what you saved</button><button class="nudge-btn ghost" id="nudgeContinue">Keep scrolling</button></div></div>`; const inView = document.querySelector('.card.in-view'); if(inView && inView.nextSibling){ feed.insertBefore(nudge, inView.nextSibling); } else { feed.appendChild(nudge); } observer.observe(nudge); nudge.querySelector('#nudgeContinue').addEventListener('click', ()=>{ const next = nudge.nextElementSibling; if(next) next.scrollIntoView({behavior:'smooth'}); }); nudge.querySelector('#nudgeCollection').addEventListener('click', openCollectionSheet); }
 function updateProgress(idx){ const total = deck.length; counter.textContent = String(Math.min(idx+1,total)).padStart(2,'0') + ' / ' + String(total).padStart(2,'0'); document.querySelectorAll('.rail-seg').forEach((seg,i)=>{ seg.classList.toggle('done', i <= idx); }); }
 const sheetBackdrop = document.getElementById('sheetBackdrop'); const contextSheet = document.getElementById('contextSheet'); function openContextSheet(q){ document.getElementById('sheetAuthor').textContent = q.author; document.getElementById('sheetSource').textContent = q.source; document.getElementById('sheetContext').textContent = q.context || 'No further context noted for this one yet.'; const link = document.getElementById('sheetLink'); if(q.link){ link.href = q.link; link.style.display = 'inline-flex'; } else { link.style.display = 'none'; } sheetBackdrop.classList.add('show'); contextSheet.classList.add('show'); }
-function closeSheets(){ sheetBackdrop.classList.remove('show'); contextSheet.classList.remove('show'); filterSheet.classList.remove('show'); collectionSheet.classList.remove('show'); musicSheet.classList.remove('show'); }
+function closeSheets(){ sheetBackdrop.classList.remove('show'); contextSheet.classList.remove('show'); filterSheet.classList.remove('show'); collectionSheet.classList.remove('show'); musicSheet.classList.remove('show'); discoverSheet.classList.remove('show'); }
 sheetBackdrop.addEventListener('click', closeSheets);
 const filterBtn = document.getElementById('filterBtn'); const filterSheet = document.getElementById('filterSheet'); const filterGrid = document.getElementById('filterGrid'); CATEGORIES.forEach(cat=>{ const chip = document.createElement('button'); chip.className = 'chip active'; chip.innerHTML = `<span class="chip-dot" style="background:${ERAS[cat].dot}"></span>${cat}`; chip.dataset.cat = cat; chip.addEventListener('click', ()=>{ if(activeCategories.has(cat)){ if(activeCategories.size > 1){ activeCategories.delete(cat); chip.classList.remove('active'); } } else { activeCategories.add(cat); chip.classList.add('active'); } }); filterGrid.appendChild(chip); }); filterBtn.addEventListener('click', ()=>{ sheetBackdrop.classList.add('show'); filterSheet.classList.add('show'); }); document.getElementById('filterApply').addEventListener('click', ()=>{ closeSheets(); buildDeck(); });
 const collectionBtn = document.getElementById('collectionBtn'); const collectionSheet = document.getElementById('collectionSheet'); const collectionList = document.getElementById('collectionList'); function openCollectionSheet(){ renderCollectionList(); sheetBackdrop.classList.add('show'); collectionSheet.classList.add('show'); }
-function renderCollectionList(){ const saved = getSaved(); if(saved.length === 0){ collectionList.innerHTML = '<div class="coll-empty">Nothing saved yet.<br>Tap the bookmark on any quote to keep it here.</div>'; return; } collectionList.innerHTML = saved.map(s=>`<div class="coll-item"><div class="coll-item-text">\"${s.text}\"</div><div class="coll-item-meta"><span>${s.author} · ${s.source}</span><button class="coll-remove" data-key="${s.key}">remove</button></div></div>`).join(''); collectionList.querySelectorAll('.coll-remove').forEach(btn=>{ btn.addEventListener('click', ()=>{ const arr = getSaved().filter(s=>s.key !== btn.dataset.key); setSaved(arr); renderCollectionList(); updateSavedBadge(); document.querySelectorAll('.save-btn').forEach(b=>{ const idx = parseInt(b.dataset.idx,10); const q = deck[idx]; if(q && quoteKey(q) === btn.dataset.key){ b.classList.remove('saved'); b.innerHTML = svgBookmark(false); } }); }); }); }
+function renderCollectionList(){ const saved = getSaved(); const addBtn = '<button class="coll-add-btn" id="collAddBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add your own quote</button>'; if(saved.length === 0){ collectionList.innerHTML = addBtn + '<div class="coll-empty">Nothing saved yet.<br>Tap the bookmark on any quote to keep it here.</div>'; document.getElementById('collAddBtn').addEventListener('click', openCompose); return; } collectionList.innerHTML = addBtn + saved.map(s=>`<div class="coll-item"><div class="coll-item-text">\"${s.text}\"${s.mine?'<span class="coll-mine-badge">yours</span>':''}</div><div class="coll-item-meta"><span>${s.author}${s.source?' · '+s.source:''}</span><button class="coll-remove" data-key="${s.key}">remove</button></div></div>`).join(''); document.getElementById('collAddBtn').addEventListener('click', openCompose); collectionList.querySelectorAll('.coll-remove').forEach(btn=>{ btn.addEventListener('click', ()=>{ const arr = getSaved().filter(s=>s.key !== btn.dataset.key); setSaved(arr); renderCollectionList(); updateSavedBadge(); document.querySelectorAll('.save-btn').forEach(b=>{ const idx = parseInt(b.dataset.idx,10); const q = deck[idx]; if(q && quoteKey(q) === btn.dataset.key){ b.classList.remove('saved'); b.innerHTML = svgBookmark(false); } }); }); }); }
 collectionBtn.addEventListener('click', openCollectionSheet);
-let holdTimer = null; let isHolding = false; function startHold(e){ if(e.target.closest('.restart-btn, .save-btn, .source, .nudge-btn, .icon-btn')) return; holdTimer = setTimeout(()=>{ isHolding = true; document.body.classList.add('holding'); dimOverlay.classList.add('active'); feed.style.scrollSnapType = 'none'; if(navigator.vibrate) navigator.vibrate(8); }, 280); } function endHold(){ clearTimeout(holdTimer); if(isHolding){ isHolding = false; document.body.classList.remove('holding'); dimOverlay.classList.remove('active'); feed.style.scrollSnapType = 'y mandatory'; } }
+let holdTimer = null; let isHolding = false; function startHold(e){ if(e.target.closest('.restart-btn, .save-btn, .mini-btn, .source, .nudge-btn, .icon-btn, .share-act, .share-close')) return; holdTimer = setTimeout(()=>{ isHolding = true; document.body.classList.add('holding'); dimOverlay.classList.add('active'); feed.style.scrollSnapType = 'none'; if(navigator.vibrate) navigator.vibrate(8); }, 280); } function endHold(){ clearTimeout(holdTimer); if(isHolding){ isHolding = false; document.body.classList.remove('holding'); dimOverlay.classList.remove('active'); feed.style.scrollSnapType = 'y mandatory'; } }
 feed.addEventListener('pointerdown', startHold); feed.addEventListener('pointerup', endHold); feed.addEventListener('pointerleave', endHold); feed.addEventListener('pointercancel', endHold);
-document.addEventListener('keydown', (e)=>{ if(contextSheet.classList.contains('show') || filterSheet.classList.contains('show') || collectionSheet.classList.contains('show') || musicSheet.classList.contains('show')){ if(e.key === 'Escape') closeSheets(); return; } const cards = Array.from(document.querySelectorAll('.card')); if(e.key === 'ArrowDown' || e.key === ' '){ e.preventDefault(); cards[Math.min(currentIndex+1, cards.length-1)].scrollIntoView({behavior:'smooth'}); } else if(e.key === 'ArrowUp'){ e.preventDefault(); cards[Math.max(currentIndex-1, 0)].scrollIntoView({behavior:'smooth'}); } });
+document.addEventListener('keydown', (e)=>{ if(contextSheet.classList.contains('show') || filterSheet.classList.contains('show') || collectionSheet.classList.contains('show') || musicSheet.classList.contains('show') || discoverSheet.classList.contains('show')){ if(e.key === 'Escape') closeSheets(); return; } const cards = Array.from(document.querySelectorAll('.card')); if(e.key === 'ArrowDown' || e.key === ' '){ e.preventDefault(); cards[Math.min(currentIndex+1, cards.length-1)].scrollIntoView({behavior:'smooth'}); } else if(e.key === 'ArrowUp'){ e.preventDefault(); cards[Math.max(currentIndex-1, 0)].scrollIntoView({behavior:'smooth'}); } });
 
 /* ============================================================
    AMBIENT MUSIC ENGINE
@@ -753,7 +942,253 @@ let _resumeOnce = false;
 function resumeAudioOnce(){ if(_resumeOnce) return; _resumeOnce = true; if(musicState.playing && musicState.sound!=='silence'){ applyPlayback(); } document.removeEventListener('pointerdown', resumeAudioOnce); }
 document.addEventListener('pointerdown', resumeAudioOnce);
 
+/* =====================================================================
+   WAVE 1 — Growth & interaction: toast, copy, narrate, share-as-image,
+   daily quote + streak, surprise.
+   ===================================================================== */
+
+// ---- toast ----
+let toastTimer=null; const toastEl=document.getElementById('toast');
+function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'), 1900); }
+
+// ---- copy ----
+function copyQuote(q){ const txt = `"${q.text}"\n— ${q.author}, ${q.source}`; if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(()=>toast('Copied to clipboard')).catch(()=>fallbackCopy(txt)); } else { fallbackCopy(txt); } }
+function fallbackCopy(txt){ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toast('Copied to clipboard'); }catch(e){ toast('Could not copy'); } document.body.removeChild(ta); }
+
+// ---- narrate (browser speech synthesis, free + offline) ----
+let speaking=false, curNarrateBtn=null;
+function narrateQuote(q, btn){ if(!('speechSynthesis' in window)){ toast('Narration not supported here'); return; } if(speaking){ window.speechSynthesis.cancel(); speaking=false; if(curNarrateBtn) curNarrateBtn.classList.remove('active'); if(curNarrateBtn===btn) return; } const u=new SpeechSynthesisUtterance(`${q.text} — ${q.author}`); u.rate=0.92; u.pitch=1.0; const vs=window.speechSynthesis.getVoices(); const pref=vs.find(v=>/en-GB/i.test(v.lang)) || vs.find(v=>/en/i.test(v.lang)); if(pref) u.voice=pref; u.onend=()=>{ speaking=false; btn.classList.remove('active'); }; u.onerror=()=>{ speaking=false; btn.classList.remove('active'); }; window.speechSynthesis.speak(u); speaking=true; curNarrateBtn=btn; btn.classList.add('active'); }
+
+// ---- share-as-image (canvas, themed per era) ----
+const ERA_PALETTE = {
+  'Stoicism':      { bg:['#2b2722','#1c1916','#100e0c'], accent:'#C9A24B', ink:'#F2EBDD' },
+  'Existentialism':{ bg:['#1a1a1f','#141418','#0c0c0f'], accent:'#8896a6', ink:'#E8E9EC' },
+  'Literature':    { bg:['#24201c','#1a1714','#0f0d0b'], accent:'#b08d57', ink:'#EFE7DA' },
+  'Psychology':    { bg:['#181a22','#121319','#0b0c10'], accent:'#7e8aa3', ink:'#E6E8EE' },
+  'Eastern & Proverbs':{ bg:['#1d211e','#151814','#0c0f0c'], accent:'#9aab8c', ink:'#E9EBE3' },
+};
+const shareModal=document.getElementById('shareModal');
+const shareCanvas=document.getElementById('shareCanvas');
+let lastShareQuote=null, lastShareBlob=null;
+
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function wrapText(ctx,text,maxW){ const words=text.split(' '); const lines=[]; let line=''; for(const w of words){ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; } else { line=test; } } if(line) lines.push(line); return lines; }
+
+function drawShareCard(q){
+  const ctx=shareCanvas.getContext('2d'); const W=1080,H=1080;
+  const pal=ERA_PALETTE[q.cat] || ERA_PALETTE['Stoicism'];
+  // bg gradient
+  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,pal.bg[0]); g.addColorStop(0.5,pal.bg[1]); g.addColorStop(1,pal.bg[2]);
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  // subtle grain
+  ctx.globalAlpha=0.04; for(let i=0;i<2600;i++){ ctx.fillStyle='#ffffff'; ctx.fillRect(Math.random()*W,Math.random()*H,1.4,1.4); } ctx.globalAlpha=1;
+  // vignette
+  const rg=ctx.createRadialGradient(W/2,H*0.95,100,W/2,H*0.95,H*0.8); rg.addColorStop(0,'rgba(0,0,0,0.4)'); rg.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+  // border frame
+  ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=2; roundRect(ctx,40,40,W-80,H-80,28); ctx.stroke();
+  // eyebrow
+  ctx.fillStyle=pal.accent; ctx.font='600 24px "Space Grotesk", sans-serif'; ctx.textAlign='center';
+  ctx.fillText((q.cat||'').toUpperCase(), W/2, 150);
+  // accent line
+  ctx.fillRect(W/2-26,172,52,3);
+  // quote text
+  ctx.fillStyle=pal.ink;
+  let fs = q.text.length>180?46 : q.text.length>110?56 : q.text.length>60?66 : 78;
+  ctx.font=`500 ${fs}px "Fraunces", Georgia, serif`;
+  const lines=wrapText(ctx,'"'+q.text+'"', W-200);
+  const lh=fs*1.32; const blockH=lines.length*lh; let y=H/2-blockH/2+fs/2;
+  lines.forEach(ln=>{ ctx.fillText(ln,W/2,y); y+=lh; });
+  // author / source
+  ctx.fillStyle=pal.accent; ctx.font='500 30px "Fraunces", serif'; ctx.fillText(q.author, W/2, H-220);
+  ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='400 22px "Space Grotesk", sans-serif'; ctx.fillText(q.source, W/2, H-180);
+  // wordmark
+  ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.font='500 24px "Fraunces", serif'; ctx.fillText('Marginalia', W/2, H-90);
+}
+
+function openShare(q){
+  lastShareQuote=q;
+  // fonts may need a tick to be ready; draw now and redraw shortly after
+  drawShareCard(q);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>drawShareCard(q)); }
+  setTimeout(()=>drawShareCard(q), 120);
+  shareModal.classList.add('show');
+}
+function closeShare(){ shareModal.classList.remove('show'); }
+
+document.getElementById('shareClose').addEventListener('click', closeShare);
+shareModal.addEventListener('click',(e)=>{ if(e.target===shareModal) closeShare(); });
+document.getElementById('shareDownload').addEventListener('click', ()=>{
+  shareCanvas.toBlob((blob)=>{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`marginalia-${(lastShareQuote.author||'quote').replace(/\s+/g,'-').toLowerCase()}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast('Image saved'); }, 'image/png');
+});
+document.getElementById('shareNative').addEventListener('click', async ()=>{
+  if(!navigator.share){ toast('Use Save image instead'); return; }
+  shareCanvas.toBlob(async (blob)=>{
+    const file=new File([blob], 'marginalia.png', {type:'image/png'});
+    try{ if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], text:`"${lastShareQuote.text}" — ${lastShareQuote.author}`}); } else { await navigator.share({title:'Marginalia', text:`"${lastShareQuote.text}" — ${lastShareQuote.author}, ${lastShareQuote.source}`}); } }catch(e){}
+  }, 'image/png');
+});
+
+// ---- daily quote + streak ----
+const DAILY_KEY='marginalia_daily_v1';
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dayNumber(){ return Math.floor(Date.parse(todayStr())/86400000); }
+function getDaily(){ try{ return JSON.parse(localStorage.getItem(DAILY_KEY)||'null'); }catch(e){ return null; } }
+function setDaily(o){ try{ localStorage.setItem(DAILY_KEY, JSON.stringify(o)); }catch(e){} }
+function pickDailyQuote(){ // deterministic by day so everyone-with-same-deck sees a stable pick per day
+  const idx = dayNumber() % QUOTES.length; return QUOTES[idx];
+}
+function updateStreak(){
+  const today=todayStr(); let d=getDaily()||{last:null,streak:0,best:0};
+  if(d.last===today){ return d; }
+  const yesterday=(()=>{ const y=new Date(); y.setDate(y.getDate()-1); return y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0'); })();
+  if(d.last===yesterday){ d.streak=(d.streak||0)+1; } else { d.streak=1; }
+  d.best=Math.max(d.best||0, d.streak); d.last=today; setDaily(d); return d;
+}
+let streakInfo = updateStreak();
+
+function insertDailyCard(){
+  const q=pickDailyQuote(); const era=ERAS[q.cat]||ERAS['Stoicism'];
+  const card=document.createElement('div'); card.className='card '+era.cls+' daily-card'; card.dataset.index='daily';
+  const dateLabel=new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+  card.innerHTML=`<div class="card-bg">${era.bg(42)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="daily-badge">Today's line ${streakInfo.streak>1?`<span class="streak-pill">🔥 ${streakInfo.streak} day streak</span>`:''}</div><div class="quote-text" style="font-size:${sizeForLength(q.text.length)}px;">${q.text}</div><div class="attribution" style="justify-content:center;"><div class="attr-left" style="align-items:center;"><div class="author">${q.author}</div><div class="source">${q.source}</div></div></div><div class="daily-date">${dateLabel}</div></div>`;
+  feed.insertBefore(card, feed.firstChild);
+}
+
+// ---- surprise: jump to a random quote in a fresh shuffle ----
+const surpriseBtn=document.getElementById('surpriseBtn');
+surpriseBtn.addEventListener('click', ()=>{ buildDeck(); requestAnimationFrame(()=>{ const cards=document.querySelectorAll('.card'); const target=cards[Math.floor(Math.random()*Math.min(cards.length-1, deck.length))]; if(target) target.scrollIntoView({behavior:'smooth'}); toast('Surprise — fresh shuffle'); }); });
+
+// keyboard: Esc closes share modal too
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && shareModal.classList.contains('show')) closeShare(); });
+
+/* =====================================================================
+   WAVE 2 — Depth & discovery: search, themed decks, author index,
+   sepia reading mode.
+   ===================================================================== */
+const discoverBtn=document.getElementById('discoverBtn');
+const discoverSheet=document.getElementById('discoverSheet');
+const discSearch=document.getElementById('discSearch');
+const searchResults=document.getElementById('searchResults');
+
+// ---- themed decks (cross-category, keyword-matched) ----
+const THEMED_DECKS = [
+  { title:'On Death & Mortality', desc:'Facing the end, and what it asks of the living.', match:q=>/death|die|mortal|grave|end|finit|short|brief/i.test(q.text+q.source) },
+  { title:'Before a Hard Decision', desc:'Lines for the moment you have to choose.', match:q=>/choos|decis|will|act|courage|brave|fear|risk/i.test(q.text) },
+  { title:'For the Morning', desc:'Begin the day deliberately.', match:q=>/morning|begin|day|wake|start|live|present/i.test(q.text) },
+  { title:'On Suffering', desc:'What pain is for, and how to carry it.', match:q=>/suffer|pain|hard|difficult|struggl|adversit|obstacl/i.test(q.text) },
+  { title:'On Self-Mastery', desc:'Ruling the one thing that is yours.', match:q=>/master|control|mind|self|disciplin|habit|will|free/i.test(q.text) },
+  { title:'On Meaning', desc:'Why we do any of it.', match:q=>/meaning|purpose|why|worth|matter|life/i.test(q.text) },
+];
+
+// ---- tabs ----
+document.querySelectorAll('.disc-tab').forEach(tab=>{ tab.addEventListener('click', ()=>{
+  document.querySelectorAll('.disc-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.disc-panel').forEach(p=>p.classList.remove('active'));
+  tab.classList.add('active');
+  document.getElementById('panel-'+tab.dataset.panel).classList.add('active');
+}); });
+
+// ---- search ----
+function renderSearch(term){
+  term=(term||'').trim().toLowerCase();
+  if(!term){ searchResults.innerHTML='<div class="search-empty">Type to search across every quote, author, and book.</div>'; return; }
+  const hits=QUOTES.filter(q=> (q.text+' '+q.author+' '+q.source+' '+q.cat).toLowerCase().includes(term)).slice(0,40);
+  if(!hits.length){ searchResults.innerHTML='<div class="search-empty">Nothing matched.<br>Try an author name or a single word.</div>'; return; }
+  searchResults.innerHTML=hits.map(q=>{ const gi=QUOTES.indexOf(q); return `<div class="search-result" data-gi="${gi}"><div class="search-result-text">"${q.text}"</div><div class="search-result-meta">${q.author} · ${q.source}</div></div>`; }).join('');
+  searchResults.querySelectorAll('.search-result').forEach(el=>{ el.addEventListener('click', ()=>{ const q=QUOTES[parseInt(el.dataset.gi,10)]; closeSheets(); buildDeckFrom([q, ...shuffle(QUOTES.filter(x=>x!==q))], false); toast('Starting from that quote'); }); });
+}
+let searchDeb=null;
+discSearch.addEventListener('input', e=>{ clearTimeout(searchDeb); searchDeb=setTimeout(()=>renderSearch(e.target.value), 120); });
+
+// ---- decks ----
+function renderDecks(){
+  const list=document.getElementById('deckList');
+  list.innerHTML=THEMED_DECKS.map((d,i)=>{ const n=QUOTES.filter(d.match).length; return `<div class="deck-card" data-deck="${i}"><div class="deck-card-title">${d.title}</div><div class="deck-card-desc">${d.desc}</div><div class="deck-card-count">${n} quote${n===1?'':'s'}</div></div>`; }).join('');
+  list.querySelectorAll('.deck-card').forEach(el=>{ el.addEventListener('click', ()=>{ const d=THEMED_DECKS[parseInt(el.dataset.deck,10)]; const picked=QUOTES.filter(d.match); if(!picked.length){ toast('That deck is empty'); return; } closeSheets(); buildDeckFrom(picked, true); toast(d.title); }); });
+}
+
+// ---- authors ----
+function renderAuthors(){
+  const list=document.getElementById('authorList');
+  const counts={}; QUOTES.forEach(q=>{ counts[q.author]=(counts[q.author]||0)+1; });
+  const authors=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  list.innerHTML=authors.map(a=>`<div class="author-row" data-author="${a.replace(/"/g,'&quot;')}"><span class="author-name">${a}</span><span class="author-count">${counts[a]} quote${counts[a]===1?'':'s'}</span></div>`).join('');
+  list.querySelectorAll('.author-row').forEach(el=>{ el.addEventListener('click', ()=>{ const a=el.dataset.author; const picked=QUOTES.filter(q=>q.author===a); closeSheets(); buildDeckFrom(picked, false); toast(a); }); });
+}
+
+discoverBtn.addEventListener('click', ()=>{ renderSearch(''); renderDecks(); renderAuthors(); sheetBackdrop.classList.add('show'); discoverSheet.classList.add('show'); setTimeout(()=>discSearch.focus(), 350); });
+
+// ---- sepia / reading mode ----
+const THEME_KEY='marginalia_theme_v1';
+const themeBtn=document.getElementById('themeBtn');
+const themeIcon=document.getElementById('themeIcon');
+const ICON_MOON='<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+const ICON_SUN='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+function applyTheme(){ const sepia=localStorage.getItem(THEME_KEY)==='sepia'; document.body.classList.toggle('sepia', sepia); themeIcon.innerHTML=sepia?ICON_SUN:ICON_MOON; themeBtn.title=sepia?'Night mode':'Reading (sepia) mode'; }
+themeBtn.addEventListener('click', ()=>{ const now=document.body.classList.contains('sepia')?'night':'sepia'; try{ localStorage.setItem(THEME_KEY, now); }catch(e){} applyTheme(); toast(now==='sepia'?'Reading mode':'Night mode'); });
+try{ applyTheme(); }catch(e){}
+
+/* =====================================================================
+   WAVE 3 — Product & platform: personal quotes (commonplace book),
+   daily reminder, PWA install + offline.
+   ===================================================================== */
+
+// ---- personal quotes: stored, then merged into QUOTES + saved collection ----
+const MY_KEY='marginalia_mine_v1';
+function getMine(){ try{ return JSON.parse(localStorage.getItem(MY_KEY)||'[]'); }catch(e){ return []; } }
+function setMine(arr){ try{ localStorage.setItem(MY_KEY, JSON.stringify(arr)); }catch(e){} }
+function mergeMine(){ // inject user quotes into the live QUOTES pool once per load
+  getMine().forEach(m=>{ if(!QUOTES.some(q=>q.text===m.text && q.author===m.author)){ QUOTES.push({ text:m.text, author:m.author, source:m.source||'Personal', cat:m.cat||'Stoicism', context:m.context||null, link:null, _mine:true }); } });
+}
+
+const composeModal=document.getElementById('composeModal');
+function openCompose(){ document.getElementById('cQuote').value=''; document.getElementById('cAuthor').value=''; document.getElementById('cSource').value=''; composeModal.classList.add('show'); setTimeout(()=>document.getElementById('cQuote').focus(), 350); }
+function closeCompose(){ composeModal.classList.remove('show'); }
+document.getElementById('composeCancel').addEventListener('click', closeCompose);
+composeModal.addEventListener('click',(e)=>{ if(e.target===composeModal) closeCompose(); });
+document.getElementById('composeSave').addEventListener('click', ()=>{
+  const text=document.getElementById('cQuote').value.trim();
+  const author=document.getElementById('cAuthor').value.trim()||'Unknown';
+  const source=document.getElementById('cSource').value.trim();
+  if(text.length<3){ toast('Write a little more first'); return; }
+  const mine=getMine(); mine.unshift({ text, author, source, cat:'Stoicism', addedAt:Date.now() }); setMine(mine);
+  // also add to saved collection, tagged as yours
+  const arr=getSaved(); const key='mine:'+Date.now(); arr.unshift({ key, text, author, source, mine:true, savedAt:Date.now() }); setSaved(arr);
+  // add live to QUOTES so it shows in the feed/search immediately
+  QUOTES.push({ text, author, source:source||'Personal', cat:'Stoicism', context:null, link:null, _mine:true });
+  updateSavedBadge(); renderCollectionList(); closeCompose(); toast('Saved to your collection');
+});
+
+// ---- daily reminder (local notification; needs permission + app open at the time) ----
+const REMIND_KEY='marginalia_remind_v1';
+function scheduleReminderIfDue(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission!=='granted') return;
+  const last=localStorage.getItem(REMIND_KEY); const today=todayStr();
+  if(last===today) return;
+  // simple model: if it's after 9am local and we haven't notified today, nudge once.
+  const hr=new Date().getHours();
+  if(hr>=9){ try{ new Notification('Marginalia', { body:"Your line for today is waiting.", icon:'icon-192.png' }); localStorage.setItem(REMIND_KEY, today); }catch(e){} }
+}
+// offer to enable reminders the first time someone opens the daily card area
+function maybeAskReminder(){ if(!('Notification' in window)) return; if(Notification.permission==='default'){ /* ask lazily on first surprise/discover use */ } }
+window.enableReminders=function(){ if(!('Notification' in window)){ toast('Notifications not supported'); return; } Notification.requestPermission().then(p=>{ if(p==='granted'){ toast('Daily reminders on'); scheduleReminderIfDue(); } else { toast('Reminders not enabled'); } }); };
+
+// ---- PWA: register service worker (offline) ----
+if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
+
+// ---- install prompt ----
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferredPrompt=e; });
+window.installApp=function(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; } else { toast('Use your browser menu → Add to Home Screen'); } };
+
+// merge personal quotes before the deck is built
+mergeMine();
+scheduleReminderIfDue();
+
 buildDeck();
+insertDailyCard();
+feed.scrollTo({top:0, behavior:'instant'});
 </script>
 </body>
 </html>
