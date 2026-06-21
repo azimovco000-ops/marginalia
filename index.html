@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Marginalia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=Noto+Serif+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#F4F1EA;
+    --ink-dim:rgba(244,241,234,0.64);
+    --ink-faint:rgba(244,241,234,0.36);
+    --serif:'Fraunces', serif;
+    --sans:'Space Grotesk', sans-serif;
+    --gold:#C9A24B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{ height:100%; overscroll-behavior-y:none; background:#08080a; }
+  body{ font-family:var(--sans); color:var(--ink); -webkit-font-smoothing:antialiased; }
+
+  .feed{
+    height:100vh; height:100dvh; width:100%;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    scroll-behavior:smooth;
+  }
+  .feed::-webkit-scrollbar{ display:none; }
+
+  .card{
+    height:100vh; height:100dvh; width:100%;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:0 30px;
+    overflow:hidden;
+  }
+
+  .card-bg{ position:absolute; inset:0; z-index:0; }
+  .card-bg svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .card-vignette{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background: radial-gradient(ellipse 120% 70% at 50% 100%, rgba(0,0,0,0.55), transparent 60%),
+                radial-gradient(ellipse 100% 50% at 50% 0%, rgba(0,0,0,0.3), transparent 55%);
+  }
+  .card-grain{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.045) 1px, transparent 0);
+    background-size: 3px 3px;
+    mix-blend-mode:overlay;
+  }
+
+  /* ============ ERA: ROME (Stoicism) ============ */
+  .era-rome{ background: linear-gradient(180deg, #2b2722 0%, #1c1916 45%, #100e0c 100%); }
+  .era-rome .eyebrow{ color:#C9A24B; }
+  .era-rome .quote-text{ color:#F2EBDD; }
+
+  /* ============ ERA: SMOKE (Existentialism) ============ */
+  .era-smoke{ background: linear-gradient(180deg, #232427 0%, #17181a 50%, #0c0d0e 100%); }
+  .era-smoke .eyebrow{ color:#D8543C; }
+  .era-smoke .quote-text{ color:#ECE9E4; }
+
+  /* ============ ERA: INK (Eastern & Proverbs) ============ */
+  .era-ink{ background: linear-gradient(180deg, #25231d 0%, #18170f 50%, #0e0d08 100%); }
+  .era-ink .eyebrow{ color:#8FA383; }
+  .era-ink .quote-text{ font-family:'Noto Serif JP', serif; color:#F1EEE3; font-weight:500; }
+
+  /* ============ ERA: VELLUM (Literature) ============ */
+  .era-vellum{ background: linear-gradient(180deg, #2c2018 0%, #1e150f 50%, #120c08 100%); }
+  .era-vellum .eyebrow{ color:#A8763F; }
+  .era-vellum .quote-text{ font-family:'Cormorant Garamond', serif; font-style:italic; font-weight:500; color:#F0E6D2; }
+
+  /* ============ ERA: MIND (Psychology) ============ */
+  .era-mind{ background: linear-gradient(180deg, #211f2c 0%, #16141f 50%, #0d0c13 100%); }
+  .era-mind .eyebrow{ color:#9B8FC9; }
+  .era-mind .quote-text{ color:#ECE9F4; }
+
+  .quote-wrap{ position:relative; z-index:2; max-width:580px; width:100%; }
+
+  .eyebrow{
+    font-family:var(--sans);
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{ content:''; width:18px; height:1px; background:currentColor; opacity:0.6; }
+
+  .quote-text{
+    font-family:var(--serif);
+    font-weight:400;
+    font-optical-sizing:auto;
+    line-height:1.27;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+  }
+
+  .attribution{
+    margin-top:32px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .attr-left{ flex:1; min-width:0; }
+  .attr-line{ width:26px; height:1.5px; background:var(--ink-faint); margin-bottom:9px; }
+  .author{ font-family:var(--sans); font-size:14.5px; font-weight:600; letter-spacing:0.01em; color:var(--ink); }
+  .source{
+    font-family:var(--sans); font-size:12px; font-weight:400; color:var(--ink-dim);
+    letter-spacing:0.02em; cursor:pointer; text-decoration:underline;
+    text-decoration-color:rgba(244,241,234,0.28); text-underline-offset:3px;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .source .ctx-icon{ width:11px; height:11px; opacity:0.6; flex-shrink:0; }
+
+  .save-btn{
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(244,241,234,0.07);
+    border:1px solid rgba(244,241,234,0.16);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0;
+    transition:background .15s ease, transform .15s ease, border-color .15s ease;
+    backdrop-filter:blur(6px);
+  }
+  .save-btn svg{ width:16px; height:16px; color:var(--ink); transition:fill .15s ease, color .15s ease; }
+  .save-btn:active{ transform:scale(0.9); }
+  .save-btn.saved{ background:rgba(201,162,75,0.18); border-color:rgba(201,162,75,0.55); }
+  .save-btn.saved svg{ color:var(--gold); fill:var(--gold); }
+  .save-pop{
+    position:absolute; top:-26px; right:0; font-family:var(--sans); font-size:10px;
+    letter-spacing:0.04em; color:var(--gold); opacity:0; pointer-events:none; white-space:nowrap;
+  }
+  .save-pop.show{ animation:popUp 1.1s ease forwards; }
+  @keyframes popUp{ 0%{opacity:0; transform:translateY(4px);} 20%{opacity:1; transform:translateY(0);} 80%{opacity:1;} 100%{opacity:0; transform:translateY(-6px);} }
+
+  .rail{
+    position:fixed; top:0; left:0; right:0; height:3px; z-index:10;
+    display:flex; gap:4px; padding:0 14px;
+    padding-top:max(14px, env(safe-area-inset-top));
+  }
+  .rail-seg{ flex:1; height:3px; border-radius:2px; background:rgba(244,241,234,0.14); overflow:hidden; min-width:3px; }
+  .rail-seg-fill{ height:100%; width:0%; background:rgba(244,241,234,0.85); border-radius:2px; transition:width .25s ease; }
+  .rail-seg.done .rail-seg-fill{ width:100%; }
+
+  .top-label{
+    position:fixed; top:0; left:0; right:0; z-index:9;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:26px 22px 0; padding-top:max(26px, calc(env(safe-area-inset-top) + 14px));
+  }
+  .top-left{ display:flex; align-items:baseline; gap:9px; pointer-events:none; }
+  .brand{ font-family:var(--serif); font-size:15px; font-weight:500; letter-spacing:0.01em; opacity:0.9; }
+  .counter{ font-family:var(--sans); font-size:11px; letter-spacing:0.06em; color:var(--ink-faint); }
+  .top-right{ display:flex; align-items:center; gap:8px; }
+  .icon-btn{
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(244,241,234,0.07); border:1px solid rgba(244,241,234,0.16);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:background .15s ease; backdrop-filter:blur(6px); position:relative;
+  }
+  .icon-btn:hover{ background:rgba(244,241,234,0.14); }
+  .icon-btn svg{ width:15px; height:15px; color:var(--ink); }
+  .icon-btn .badge{
+    position:absolute; top:-5px; right:-5px;
+    background:var(--gold); color:#1a1305; font-size:9px; font-weight:700;
+    border-radius:8px; min-width:15px; height:15px;
+    display:flex; align-items:center; justify-content:center; padding:0 3px; font-family:var(--sans);
+  }
+
+  .sit-hint{
+    position:absolute; bottom:max(28px, env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
+    font-family:var(--sans); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink-faint); display:flex; align-items:center; gap:7px; z-index:2;
+    opacity:0; animation:hintIn 0.6s ease 1.4s forwards;
+  }
+  @keyframes hintIn{ to{ opacity:0.55; } }
+  .sit-hint .ring{ width:8px; height:8px; border-radius:50%; border:1.3px solid var(--ink-faint); }
+
+  .dim-overlay{ position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; z-index:5; transition:opacity .5s ease; }
+  .dim-overlay.active{ opacity:0.45; }
+  body.holding .card.in-view .quote-wrap{ transform:scale(1.045); transition:transform .35s cubic-bezier(.2,.8,.2,1); }
+  body.holding .top-label, body.holding .rail, body.holding .sit-hint{ opacity:0; transition:opacity .4s ease; }
+
+  .end-card .quote-wrap{ text-align:center; }
+  .end-card .end-icon{ font-family:var(--serif); font-size:34px; opacity:0.7; margin-bottom:18px; }
+  .end-card .end-title{ font-family:var(--serif); font-size:26px; font-weight:500; margin-bottom:10px; }
+  .end-card .end-sub{ font-family:var(--sans); font-size:13px; color:var(--ink-dim); line-height:1.6; max-width:340px; margin:0 auto; }
+  .restart-btn{
+    margin-top:28px; background:rgba(244,241,234,0.1); border:1px solid rgba(244,241,234,0.22);
+    color:var(--ink); font-family:var(--sans); font-size:12.5px; font-weight:500; letter-spacing:0.02em;
+    padding:12px 24px; border-radius:100px; cursor:pointer; transition:background .15s ease;
+  }
+  .restart-btn:hover{ background:rgba(244,241,234,0.16); }
+
+  .nudge-card .quote-wrap{ text-align:center; }
+  .nudge-card .nudge-icon{ font-size:30px; margin-bottom:16px; opacity:0.85; }
+  .nudge-card .nudge-title{ font-family:var(--serif); font-size:24px; font-weight:500; margin-bottom:10px; }
+  .nudge-card .nudge-sub{ font-family:var(--sans); font-size:13px; color:var(--ink-dim); line-height:1.65; max-width:330px; margin:0 auto 26px; }
+  .nudge-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .nudge-btn{ font-family:var(--sans); font-size:12.5px; font-weight:500; padding:12px 22px; border-radius:100px; cursor:pointer; border:1px solid rgba(244,241,234,0.22); }
+  .nudge-btn.primary{ background:var(--gold); color:#1a1305; border:none; font-weight:600; }
+  .nudge-btn.ghost{ background:transparent; color:var(--ink); }
+
+  .sheet-backdrop{
+    position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(2px); z-index:20;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .sheet-backdrop.show{ opacity:1; pointer-events:auto; }
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:21;
+    background:#15131a; border-top:1px solid rgba(244,241,234,0.12);
+    border-radius:20px 20px 0 0; padding:10px 24px max(26px, env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    max-height:72vh; overflow-y:auto;
+  }
+  .sheet.show{ transform:translateY(0); }
+  .sheet-handle{ width:36px; height:4px; border-radius:3px; background:rgba(244,241,234,0.2); margin:8px auto 18px; }
+  .sheet-author{ font-family:var(--serif); font-size:20px; font-weight:500; margin-bottom:3px; }
+  .sheet-source{ font-family:var(--sans); font-size:12.5px; color:var(--gold); margin-bottom:18px; }
+  .sheet-context{ font-family:var(--sans); font-size:14px; line-height:1.7; color:var(--ink-dim); margin-bottom:20px; }
+  .sheet-link{
+    display:inline-flex; align-items:center; gap:7px; font-family:var(--sans); font-size:12.5px; font-weight:500;
+    color:var(--ink); background:rgba(244,241,234,0.08); border:1px solid rgba(244,241,234,0.18);
+    padding:11px 18px; border-radius:100px; text-decoration:none;
+  }
+  .sheet-link svg{ width:13px; height:13px; }
+  .sheet-link:hover{ background:rgba(244,241,234,0.14); }
+
+  .filter-sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:21;
+    background:#15131a; border-top:1px solid rgba(244,241,234,0.12);
+    border-radius:20px 20px 0 0; padding:10px 22px max(26px, env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
+  }
+  .filter-sheet.show{ transform:translateY(0); }
+  .filter-title{ font-family:var(--serif); font-size:18px; font-weight:500; margin:6px 0 16px; }
+  .filter-grid{ display:flex; flex-wrap:wrap; gap:9px; margin-bottom:20px; }
+  .chip{
+    font-family:var(--sans); font-size:12.5px; font-weight:500; padding:10px 16px; border-radius:100px;
+    border:1px solid rgba(244,241,234,0.2); background:transparent; color:var(--ink-dim); cursor:pointer;
+    transition:all .15s ease; display:flex; align-items:center; gap:7px;
+  }
+  .chip .chip-dot{ width:7px; height:7px; border-radius:50%; }
+  .chip.active{ background:var(--gold); border-color:var(--gold); color:#1a1305; font-weight:600; }
+  .chip.active .chip-dot{ background:#1a1305; }
+  .filter-apply{
+    width:100%; background:rgba(244,241,234,0.1); border:1px solid rgba(244,241,234,0.22); color:var(--ink);
+    font-family:var(--sans); font-size:13px; font-weight:600; padding:13px; border-radius:100px; cursor:pointer;
+  }
+
+  .collection-sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:21;
+    background:#15131a; border-top:1px solid rgba(244,241,234,0.12);
+    border-radius:20px 20px 0 0; padding:10px 22px max(26px, env(safe-area-inset-bottom));
+    transform:translateY(100%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    max-height:78vh; overflow-y:auto;
+  }
+  .collection-sheet.show{ transform:translateY(0); }
+  .coll-title{ font-family:var(--serif); font-size:18px; font-weight:500; margin:6px 0 16px; }
+  .coll-item{ padding:14px 0; border-bottom:1px solid rgba(244,241,234,0.08); }
+  .coll-item:last-child{ border-bottom:none; }
+  .coll-item-text{ font-family:var(--serif); font-size:15px; line-height:1.45; margin-bottom:8px; }
+  .coll-item-meta{ font-family:var(--sans); font-size:11.5px; color:var(--ink-faint); display:flex; justify-content:space-between; align-items:center; }
+  .coll-remove{ background:none; border:none; color:var(--ink-faint); font-family:var(--sans); font-size:11px; cursor:pointer; text-decoration:underline; }
+  .coll-empty{ text-align:center; padding:40px 0; color:var(--ink-faint); font-family:var(--sans); font-size:13px; line-height:1.6; }
+
+  @media (min-width:600px){
+    .quote-text{ font-size:38px !important; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-label">
+  <div class="top-left">
+    <span class="brand">Marginalia</span>
+    <span class="counter" id="counter">01 / 60</span>
+  </div>
+  <div class="top-right">
+    <div class="icon-btn" id="filterBtn" title="Filter by theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+    </div>
+    <div class="icon-btn" id="collectionBtn" title="Saved quotes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      <span class="badge" id="savedBadge" style="display:none;">0</span>
+    </div>
+  </div>
+</div>
+
+<div class="rail" id="rail"></div>
+<div class="dim-overlay" id="dimOverlay"></div>
+
+<div class="feed" id="feed"></div>
+
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="contextSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-author" id="sheetAuthor"></div>
+  <div class="sheet-source" id="sheetSource"></div>
+  <div class="sheet-context" id="sheetContext"></div>
+  <a class="sheet-link" id="sheetLink" href="#" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+    <span>Read the full text</span>
+  </a>
+</div>
+
+<div class="filter-sheet" id="filterSheet">
+  <div class="sheet-handle"></div>
+  <div class="filter-title">Choose a mood</div>
+  <div class="filter-grid" id="filterGrid"></div>
+  <button class="filter-apply" id="filterApply">Show this deck</button>
+</div>
+
+<div class="collection-sheet" id="collectionSheet">
+  <div class="sheet-handle"></div>
+  <div class="coll-title">Saved</div>
+  <div id="collectionList"></div>
+</div>
+
+<script>
+// Included inline in production
+const ERAS = {
+  'Stoicism': {
+    cls:'era-rome',
+    dot:'#C9A24B',
+    eyebrow:'Ancient Rome',
+    bg: (seed)=>`
+      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="marble${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.85  0 0 0 0 0.78  0 0 0 0 0.62  0 0 0 0.06 0"/></filter>
+        </defs>
+        <rect width="400" height="800" filter="url(#marble${seed})"/>
+        <g opacity="0.16" stroke="#E8D9B0" stroke-width="1.4" fill="none">
+          <line x1="60" y1="-20" x2="60" y2="500"/><line x1="100" y1="-20" x2="100" y2="540"/>
+          <line x1="340" y1="280" x2="340" y2="860"/><line x1="380" y1="320" x2="380" y2="860"/>
+        </g>
+        <g transform="translate(200,690)" opacity="0.22">
+          <path d="M-70,0 C-70,-26 -40,-30 -22,-14 C-8,-30 8,-30 22,-14 C40,-30 70,-26 70,0 C70,14 40,10 22,4 C8,12 -8,12 -22,4 C-40,10 -70,14 -70,0 Z" fill="none" stroke="#E8D9B0" stroke-width="1.6"/>
+          <circle cx="0" cy="-6" r="2" fill="#E8D9B0"/>
+        </g>
+      </svg>`
+  },
+  'Existentialism': {
+    cls:'era-smoke',
+    dot:'#D8543C',
+    eyebrow:'20th-Century Europe',
+    bg: (seed)=>`
+      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="smoke${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.018" numOctaves="4" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.09 0"/></filter>
+        </defs>
+        <rect width="400" height="800" filter="url(#smoke${seed})"/>
+        <g opacity="0.2" stroke="#E8E4DC" stroke-width="1">
+          <line x1="0" y1="120" x2="400" y2="118"/>
+          <line x1="0" y1="124" x2="400" y2="122"/>
+        </g>
+        <circle cx="330" cy="90" r="3.5" fill="#D8543C" opacity="0.55"/>
+        <line x1="330" y1="93.5" x2="330" y2="150" stroke="#9C9890" stroke-width="1.4" opacity="0.4"/>
+      </svg>`
+  },
+  'Eastern & Proverbs': {
+    cls:'era-ink',
+    dot:'#8FA383',
+    eyebrow:'Classical East Asia',
+    bg: (seed)=>`
+      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="paper${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.025 0.05" numOctaves="2" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.85  0 0 0 0 0.65  0 0 0 0.05 0"/></filter>
+        </defs>
+        <rect width="400" height="800" filter="url(#paper${seed})"/>
+        <circle cx="200" cy="660" r="98" fill="none" stroke="#E3DCC2" stroke-width="5" opacity="0.18" stroke-linecap="round" stroke-dasharray="540 40" transform="rotate(-18 200 660)"/>
+      </svg>`
+  },
+  'Literature': {
+    cls:'era-vellum',
+    dot:'#A8763F',
+    eyebrow:'The Western Canon',
+    bg: (seed)=>`
+      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="vellum${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.018 0.03" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.74  0 0 0 0 0.5  0 0 0 0.07 0"/></filter>
+        </defs>
+        <rect width="400" height="800" filter="url(#vellum${seed})"/>
+        <g opacity="0.2" stroke="#D8B978" stroke-width="1.3" fill="none">
+          <path d="M30,40 Q30,18 52,18 M30,40 Q30,18 8,18"/>
+          <path d="M370,760 Q370,782 348,782 M370,760 Q370,782 392,782"/>
+        </g>
+      </svg>`
+  },
+  'Psychology': {
+    cls:'era-mind',
+    dot:'#9B8FC9',
+    eyebrow:'Depth Psychology',
+    bg: (seed)=>`
+      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="dream${seed}"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.022" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.65  0 0 0 0 0.58  0 0 0 0 0.85  0 0 0 0.07 0"/></filter>
+        </defs>
+        <rect width="400" height="800" filter="url(#dream${seed})"/>
+        <g opacity="0.16" stroke="#C9C2E8" stroke-width="1" fill="none">
+          <circle cx="200" cy="640" r="50"/><circle cx="200" cy="640" r="78"/><circle cx="200" cy="640" r="106"/>
+        </g>
+      </svg>`
+  }
+};
+
+const QUOTES = [
+{ text:"You have power over your mind — not outside events. Realize this, and you will find strength.", author:"Marcus Aurelius", source:"Meditations", cat:"Stoicism", context:"Written as private notes to himself while leading military campaigns, never intended for publication. This line sits at the center of Stoic practice: the only thing fully within your control is your own judgment.", link:"https://www.gutenberg.org/ebooks/2680" },
+{ text:"We suffer more often in imagination than in reality.", author:"Seneca", source:"Letters from a Stoic", cat:"Stoicism", context:"From a letter to his friend Lucilius. Seneca argued that anticipating disaster does more damage than disaster itself — most of what we fear never actually arrives.", link:"https://www.gutenberg.org/ebooks/56075" },
+{ text:"It is not that we have a short time to live, but that we waste a lot of it.", author:"Seneca", source:"On the Shortness of Life", cat:"Stoicism", context:"Seneca's central argument here is that life isn't short — most people just spend it badly, on other people's priorities instead of their own.", link:"https://www.gutenberg.org/ebooks/56075" },
+{ text:"Begin at once to live, and count each separate day as a separate life.", author:"Seneca", source:"Letters from a Stoic", cat:"Stoicism", context:"Part of Seneca's repeated insistence that the present is the only thing we actually possess — the past is gone and the future isn't promised.", link:"https://www.gutenberg.org/ebooks/56075" },
+{ text:"Difficulties strengthen the mind, as labor does the body.", author:"Seneca", source:"Letters from a Stoic", cat:"Stoicism", context:"Seneca treats hardship the way an athlete treats training — something to be sought rather than avoided, because it's what builds capacity.", link:"https://www.gutenberg.org/ebooks/56075" },
+{ text:"He who is brave is free.", author:"Seneca", source:"attributed", cat:"Stoicism", context:"A compressed Stoic claim: freedom isn't the absence of constraint, it's the courage to act rightly despite constraint.", link:null },
+{ text:"Wherever there is a human being, there is an opportunity for kindness.", author:"Seneca", source:"On Anger", cat:"Stoicism", context:"Written as part of a longer argument that anger is never justified — that every interaction is instead a chance to practice the opposite.", link:"https://www.gutenberg.org/ebooks/56075" },
+{ text:"Whatever happens to you has been waiting to happen since the beginning of time.", author:"Marcus Aurelius", source:"Meditations", cat:"Stoicism", context:"Aurelius's way of making peace with fate — nothing that happens to you is a special insult from the universe, it's simply cause and effect playing out.", link:"https://www.gutenberg.org/ebooks/2680" },
+{ text:"The impediment to action advances action. What stands in the way becomes the way.", author:"Marcus Aurelius", source:"Meditations", cat:"Stoicism", context:"Perhaps the most quoted Stoic line in modern self-help — obstacles aren't separate from the path, they're the material the path is made of.", link:"https://www.gutenberg.org/ebooks/2680" },
+{ text:"The chief task in life is simply this: to identify and separate matters so that I can say clearly which are externals not under my control.", author:"Epictetus", source:"Discourses", cat:"Stoicism", context:"Epictetus was born a slave and built his entire philosophy around this one distinction — control what's yours, release what isn't.", link:"https://www.gutenberg.org/ebooks/45109" },
+{ text:"Man's happiness consists in this, to know his own nature, and to follow it.", author:"Epictetus", source:"Discourses", cat:"Stoicism", context:"Epictetus taught that suffering comes from wanting reality to be other than it is — happiness means aligning your will with your actual nature.", link:"https://www.gutenberg.org/ebooks/45109" },
+{ text:"First say to yourself what you would be; and then do what you have to do.", author:"Epictetus", source:"Discourses", cat:"Stoicism", context:"A blunt instruction: decide on your character before you decide on your actions, since the actions should follow from the character.", link:"https://www.gutenberg.org/ebooks/45109" },
+{ text:"No man is free who is not master of himself.", author:"Epictetus", source:"Discourses", cat:"Stoicism", context:"Epictetus redefines freedom away from external circumstance entirely — a king ruled by his appetites is less free than a slave ruled by reason.", link:"https://www.gutenberg.org/ebooks/45109" },
+{ text:"Waste no more time arguing about what a good man should be. Be one.", author:"Marcus Aurelius", source:"Meditations", cat:"Stoicism", context:"A note to himself, likely written in frustration with his own tendency to philosophize instead of act.", link:"https://www.gutenberg.org/ebooks/2680" },
+{ text:"How much trouble he avoids who does not look to see what his neighbor says or does.", author:"Marcus Aurelius", source:"Meditations", cat:"Stoicism", context:"An early articulation of a very modern problem — comparison and surveillance of others as a source of unnecessary suffering.", link:"https://www.gutenberg.org/ebooks/2680" },
+{ text:"If it is not right, do not do it; if it is not true, do not say it.", author:"Marcus Aurelius", source:"Meditations", cat:"Stoicism", context:"One of the simplest ethical rules in the book — a two-part test Aurelius applied before any word or deed.", link:"https://www.gutenberg.org/ebooks/2680" },
+{ text:"The unexamined life is not worth living.", author:"Socrates", source:"as recorded by Plato, Apology", cat:"Stoicism", context:"Spoken at Socrates's own trial, where he was sentenced to death for his relentless questioning of Athenian society. He chose the verdict over abandoning the practice.", link:"https://www.gutenberg.org/ebooks/1656" },
+{ text:"The only true wisdom is in knowing you know nothing.", author:"Socrates", source:"as recorded by Plato", cat:"Stoicism", context:"Often called the Socratic paradox — Socrates believed his only advantage over supposedly wise men was that he, at least, knew the limits of his own knowledge.", link:"https://www.gutenberg.org/ebooks/1656" },
+{ text:"Knowing yourself is the beginning of all wisdom.", author:"Aristotle", source:"attributed", cat:"Stoicism", context:"Commonly attributed to Aristotle, echoing the Delphic maxim 'know thyself' that predates him — a foundational idea across nearly all of Greek philosophy.", link:null },
+{ text:"He who has overcome his fears will truly be free.", author:"Aristotle", source:"attributed", cat:"Stoicism", context:"Attribution to Aristotle is uncertain, but it reflects his broader ethical framework where virtue means mastering, not suppressing, the passions.", link:null },
+{ text:"He who fears he will suffer, already suffers because he fears.", author:"Michel de Montaigne", source:"Essays", cat:"Stoicism", context:"From Montaigne's wandering, deeply personal essays — an early modern echo of Stoic ideas about anticipatory suffering.", link:"https://www.gutenberg.org/ebooks/3600" },
+{ text:"A ship in harbor is safe, but that is not what ships are built for.", author:"John A. Shedd", source:"Salt from My Attic", cat:"Stoicism", context:"From a 1928 collection of aphorisms — a much newer quote than most in this collection, but it has the compressed, proverb-like form of something far older.", link:null },
+{ text:"Man is condemned to be free; because once thrown into the world, he is responsible for everything he does.", author:"Jean-Paul Sartre", source:"Existentialism Is a Humanism", cat:"Existentialism", context:"Sartre's central claim: there's no human nature handed to us in advance, so every choice we make is entirely our own responsibility — which is both terrifying and liberating.", link:null },
+{ text:"Hell is other people.", author:"Jean-Paul Sartre", source:"No Exit", cat:"Existentialism", context:"Spoken by a character trapped in a room with two strangers for eternity. Often misread as misanthropy — Sartre meant that we become trapped when we let others' judgment define who we are.", link:null },
+{ text:"Man is not, in truth, free to choose without choosing to be free.", author:"Jean-Paul Sartre", source:"Being and Nothingness", cat:"Existentialism", context:"From Sartre's dense philosophical treatise — even refusing to choose is itself a choice, so genuine non-freedom isn't actually available to us.", link:null },
+{ text:"Life has no meaning a priori... It is up to you to give it a meaning.", author:"Jean-Paul Sartre", source:"Existentialism Is a Humanism", cat:"Existentialism", context:"Sartre rejected the idea that meaning is discovered — for him it has to be actively constructed through choice and action.", link:null },
+{ text:"One must imagine Sisyphus happy.", author:"Albert Camus", source:"The Myth of Sisyphus", cat:"Existentialism", context:"Camus's closing line on the Greek figure condemned to push a boulder uphill forever. His argument: the struggle itself, embraced without illusion, can be enough.", link:null },
+{ text:"In the depth of winter, I finally learned that within me there lay an invincible summer.", author:"Albert Camus", source:"Return to Tipasa", cat:"Existentialism", context:"Written during a period of personal and political turmoil — Camus describing a resilience he found beneath despair, not instead of it.", link:null },
+{ text:"There is but one truly serious philosophical problem, and that is suicide.", author:"Albert Camus", source:"The Myth of Sisyphus", cat:"Existentialism", context:"The opening line of Camus's essay on the absurd. He goes on to argue the opposite of despair — that recognizing life's lack of inherent meaning is where real freedom begins.", link:null },
+{ text:"Freedom is what you do with what's been done to you.", author:"Jean-Paul Sartre", source:"attributed", cat:"Existentialism", context:"A compressed statement of Sartre's idea that circumstance doesn't determine us — our response to circumstance is where the self is actually made.", link:null },
+{ text:"Don't wait for the Last Judgment. It takes place every day.", author:"Albert Camus", source:"The Fall", cat:"Existentialism", context:"Spoken by the narrator of Camus's late novel — a reminder that moral reckoning isn't deferred to some afterlife, it happens in the choices of ordinary days.", link:null },
+{ text:"He who has a why to live can bear almost any how.", author:"Friedrich Nietzsche", source:"Twilight of the Idols", cat:"Existentialism", context:"Later popularized by Viktor Frankl in Man's Search for Meaning. Nietzsche's claim is that purpose, not comfort, is what makes hardship survivable.", link:"https://www.gutenberg.org/ebooks/52263" },
+{ text:"What does not kill me makes me stronger.", author:"Friedrich Nietzsche", source:"Twilight of the Idols", cat:"Existentialism", context:"One of Nietzsche's most famous and most misquoted lines — originally part of a broader argument about adversity as a forge for character.", link:"https://www.gutenberg.org/ebooks/52263" },
+{ text:"To live is to suffer, to survive is to find some meaning in the suffering.", author:"Friedrich Nietzsche", source:"attributed", cat:"Existentialism", context:"This exact phrasing is a popular paraphrase rather than a verified direct quote, but it closely tracks Nietzsche's actual arguments about suffering and meaning.", link:null },
+{ text:"He who fights with monsters might take care lest he thereby become a monster.", author:"Friedrich Nietzsche", source:"Beyond Good and Evil", cat:"Existentialism", context:"A warning about moral contamination — that opposing something destructive can quietly reshape you into its likeness if you're not careful.", link:"https://www.gutenberg.org/ebooks/4363" },
+{ text:"It does not matter how slowly you go as long as you do not stop.", author:"Confucius", source:"attributed", cat:"Eastern & Proverbs", context:"Widely attributed to Confucius, though the exact original source is debated. The sentiment runs throughout Confucian thought: steady cultivation over time matters more than speed.", link:null },
+{ text:"The journey of a thousand miles begins with a single step.", author:"Lao Tzu", source:"Tao Te Ching", cat:"Eastern & Proverbs", context:"From the foundational text of Taoism. Lao Tzu repeatedly argues that the smallest, most immediate action is the only real point of leverage anyone has.", link:"https://www.gutenberg.org/ebooks/216" },
+{ text:"Nature does not hurry, yet everything is accomplished.", author:"Lao Tzu", source:"Tao Te Ching", cat:"Eastern & Proverbs", context:"A core Taoist idea — wu wei, or effortless action. Things unfold in their own time, and forcing them rarely improves the outcome.", link:"https://www.gutenberg.org/ebooks/216" },
+{ text:"When you realize there is nothing lacking, the whole world belongs to you.", author:"Lao Tzu", source:"Tao Te Ching", cat:"Eastern & Proverbs", context:"An expression of Taoist contentment — not resignation, but the recognition that craving is what manufactures the feeling of lack in the first place.", link:"https://www.gutenberg.org/ebooks/216" },
+{ text:"A jug fills drop by drop.", author:"Buddha", source:"Dhammapada", cat:"Eastern & Proverbs", context:"From one of the earliest and most widely read Buddhist texts — a teaching on accumulated small effort, since wisdom and virtue are built gradually, not all at once.", link:"https://www.gutenberg.org/ebooks/2017" },
+{ text:"Holding on to anger is like drinking poison and expecting the other person to die.", author:"Buddha", source:"attributed", cat:"Eastern & Proverbs", context:"Likely a later paraphrase rather than a direct canonical quote, but it captures a recurring Buddhist teaching on the self-harm of resentment.", link:null },
+{ text:"What you think, you become. What you feel, you attract. What you imagine, you create.", author:"Buddha", source:"attributed", cat:"Eastern & Proverbs", context:"A modern paraphrase popular in self-help circles, loosely drawn from Buddhist teachings on the mind as the origin of experience.", link:null },
+{ text:"Fall seven times, stand up eight.", author:"Japanese Proverb", source:"traditional", cat:"Eastern & Proverbs", context:"A traditional proverb (nana korobi ya oki) expressing resilience as a simple arithmetic — recovery just has to outnumber the falls by one.", link:null },
+{ text:"The bamboo that bends is stronger than the oak that resists.", author:"Japanese Proverb", source:"traditional", cat:"Eastern & Proverbs", context:"A proverb prizing flexibility over rigid strength — what survives a storm is often what can bend, not what refuses to.", link:null },
+{ text:"A bird does not sing because it has an answer. It sings because it has a song.", author:"Chinese Proverb", source:"traditional", cat:"Eastern & Proverbs", context:"On expression for its own sake rather than for the sake of resolution — speaking or creating doesn't require having it all figured out first.", link:null },
+{ text:"When the student is ready, the teacher appears.", author:"Buddhist Proverb", source:"traditional", cat:"Eastern & Proverbs", context:"A proverb on readiness — that wisdom is available constantly, but only becomes visible once someone is actually prepared to receive it.", link:null },
+{ text:"There is nothing either good or bad, but thinking makes it so.", author:"William Shakespeare", source:"Hamlet", cat:"Literature", context:"Spoken by Hamlet to Rosencrantz and Guildenstern. A startlingly early articulation of what we'd now call cognitive framing — the same circumstance read as misfortune by one mind and opportunity by another.", link:"https://www.gutenberg.org/ebooks/1524" },
+{ text:"We are such stuff as dreams are made on, and our little life is rounded with a sleep.", author:"William Shakespeare", source:"The Tempest", cat:"Literature", context:"Prospero's speech near the play's end, often read as Shakespeare's own farewell to the stage — life framed as brief, insubstantial, and theatrical.", link:"https://www.gutenberg.org/ebooks/23042" },
+{ text:"I have made this letter longer than usual because I lack the time to make it shorter.", author:"Blaise Pascal", source:"Lettres Provinciales", cat:"Literature", context:"Pascal acknowledging that brevity takes more effort than length — a line still quoted by writers and editors centuries later.", link:null },
+{ text:"It was the best of times, it was the worst of times.", author:"Charles Dickens", source:"A Tale of Two Cities", cat:"Literature", context:"The famous opening line, describing the contradictions of the French Revolutionary era — and arguably of every era since.", link:"https://www.gutenberg.org/ebooks/98" },
+{ text:"All happy families are alike; each unhappy family is unhappy in its own way.", author:"Leo Tolstoy", source:"Anna Karenina", cat:"Literature", context:"The novel's opening line — Tolstoy suggesting that dysfunction is more varied and individual than functioning ever is.", link:"https://www.gutenberg.org/ebooks/1399" },
+{ text:"It is only with the heart that one can see rightly; what is essential is invisible to the eye.", author:"Antoine de Saint-Exupéry", source:"The Little Prince", cat:"Literature", context:"Spoken by the fox to the little prince — the book's central lesson on the limits of pure observation without attachment or feeling.", link:null },
+{ text:"Whatever our souls are made of, his and mine are the same.", author:"Emily Brontë", source:"Wuthering Heights", cat:"Literature", context:"Catherine's declaration about Heathcliff — one of the most intense statements of identification between two people in English literature.", link:"https://www.gutenberg.org/ebooks/768" },
+{ text:"So we beat on, boats against the current, borne back ceaselessly into the past.", author:"F. Scott Fitzgerald", source:"The Great Gatsby", cat:"Literature", context:"The novel's closing line — Nick Carraway reflecting on Gatsby's doomed pursuit of a past that can't be recovered, and on the same impulse in everyone.", link:"https://www.gutenberg.org/ebooks/64317" },
+{ text:"Not all those who wander are lost.", author:"J.R.R. Tolkien", source:"The Fellowship of the Ring", cat:"Literature", context:"From a poem describing the ranger Aragorn — a line about purposeful uncertainty, wandering as a form of seeking rather than being lost.", link:null },
+{ text:"One does not become enlightened by imagining figures of light, but by making the darkness conscious.", author:"Carl Jung", source:"Civilization in Transition", cat:"Psychology", context:"Central to Jung's idea of 'shadow work' — growth comes from integrating the parts of ourselves we'd rather not look at, not from pretending they aren't there.", link:null },
+{ text:"Until you make the unconscious conscious, it will direct your life and you will call it fate.", author:"Carl Jung", source:"attributed", cat:"Psychology", context:"A frequently cited paraphrase of Jungian ideas about how unexamined patterns repeat themselves and feel like external destiny rather than internal habit.", link:null },
+{ text:"Knowing your own darkness is the best method for dealing with the darknesses of other people.", author:"Carl Jung", source:"Civilization in Transition", cat:"Psychology", context:"Jung's argument that self-awareness, not moral superiority, is what actually equips someone to navigate conflict with others.", link:null },
+{ text:"The privilege of a lifetime is to become who you truly are.", author:"Carl Jung", source:"attributed", cat:"Psychology", context:"A widely shared paraphrase of Jung's concept of individuation — the lifelong process of integrating all parts of the psyche into a coherent self.", link:null },
+{ text:"Everything that irritates us about others can lead us to an understanding of ourselves.", author:"Carl Jung", source:"attributed", cat:"Psychology", context:"Connects to Jung's theory of projection — what we react to most strongly in others often reflects something unacknowledged in ourselves.", link:null },
+{ text:"Who looks outside, dreams; who looks inside, awakes.", author:"Carl Jung", source:"attributed", cat:"Psychology", context:"A short articulation of Jung's broader insistence that real change is an inward process, not something achieved by rearranging external circumstances.", link:null }
+];
+
+const CATEGORIES = [...new Set(QUOTES.map(q=>q.cat))];
+const STORE_KEY = 'marginalia_saved_v2';
+function getSaved(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }catch(e){ return []; } }
+function setSaved(arr){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }catch(e){} }
+function quoteKey(q){ return q.author + '::' + q.text.slice(0,40); }
+function isSaved(q){ return getSaved().some(s=>s.key === quoteKey(q)); }
+function toggleSaved(q){ const arr = getSaved(); const key = quoteKey(q); const idx = arr.findIndex(s=>s.key===key); if(idx >= 0){ arr.splice(idx,1); } else { arr.unshift({ key, text:q.text, author:q.author, source:q.source, savedAt:Date.now() }); } setSaved(arr); updateSavedBadge(); return idx < 0; }
+function updateSavedBadge(){ const n = getSaved().length; const badge = document.getElementById('savedBadge'); badge.style.display = n > 0 ? 'flex' : 'none'; badge.textContent = n > 99 ? '99+' : String(n); }
+const feed = document.getElementById('feed'); const rail = document.getElementById('rail'); const counter = document.getElementById('counter'); const dimOverlay = document.getElementById('dimOverlay'); let activeCategories = new Set(CATEGORIES); let deck = []; let viewedThisSession = 0; const SESSION_CAP = 15; let nudgeShown = false;
+function shuffle(arr){ const a = [...arr]; for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; }
+function sizeForLength(len){ if(len > 140) return 21; if(len > 90) return 26; if(len > 50) return 32; return 39; }
+function svgBookmark(filled){ return `<svg viewBox="0 0 24 24" fill="${filled?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>`; }
+function buildDeck(){ const filtered = QUOTES.filter(q => activeCategories.has(q.cat)); deck = shuffle(filtered.length ? filtered : QUOTES); renderDeck(); }
+function renderDeck(){ feed.innerHTML = ''; rail.innerHTML = ''; const total = deck.length; deck.forEach((_, i)=>{ const seg = document.createElement('div'); seg.className = 'rail-seg'; seg.id = 'seg-'+i; seg.innerHTML = '<div class="rail-seg-fill"></div>'; rail.appendChild(seg); }); deck.forEach((q, i)=>{ const era = ERAS[q.cat]; const card = document.createElement('div'); card.className = 'card ' + era.cls; card.dataset.index = i; const fontSize = sizeForLength(q.text.length); const saved = isSaved(q); const seed = (i*7 + 13) % 89; card.innerHTML = `<div class="card-bg">${era.bg(seed)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="eyebrow">${era.eyebrow}</div><div class="quote-text" style="font-size:${fontSize}px;">${q.text}</div><div class="attribution"><div class="attr-left"><div class="attr-line"></div><div class="author">${q.author}</div><div class="source" data-idx="${i}">${q.source}${q.context ? ' <svg class="ctx-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>' : ''}</div></div><div style="position:relative;"><span class="save-pop" id="pop-${i}">Saved</span><div class="save-btn ${saved?'saved':''}" data-idx="${i}">${svgBookmark(saved)}</div></div></div></div>${i===0 ? '<div class="sit-hint"><span class="ring"></span>Hold to sit with it</div>' : ''}`; feed.appendChild(card); }); const endCard = document.createElement('div'); endCard.className = 'card era-mind end-card'; endCard.dataset.index = total; endCard.innerHTML = `<div class="card-bg">${ERAS['Psychology'].bg(91)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="end-icon">·  ·  ·</div><div class="end-title">That's the deck.</div><div class="end-sub">${total} lines from minds that thought hard about how to live. Worth rereading slower than you scrolled it.</div><button class="restart-btn" id="restartBtn">Shuffle &amp; start over</button></div>`; feed.appendChild(endCard); attachCardListeners(); setupObserver(); updateProgress(0); updateSavedBadge(); feed.scrollTo({top:0, behavior:'instant'}); }
+function attachCardListeners(){ document.querySelectorAll('.save-btn').forEach(btn=>{ btn.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(btn.dataset.idx, 10); const q = deck[idx]; const nowSaved = toggleSaved(q); btn.classList.toggle('saved', nowSaved); btn.innerHTML = svgBookmark(nowSaved); if(nowSaved){ const pop = document.getElementById('pop-'+idx); pop.classList.remove('show'); void pop.offsetWidth; pop.classList.add('show'); } }); }); document.querySelectorAll('.source[data-idx]').forEach(el=>{ el.addEventListener('click', (e)=>{ e.stopPropagation(); const idx = parseInt(el.dataset.idx, 10); openContextSheet(deck[idx]); }); }); document.getElementById('restartBtn')?.addEventListener('click', ()=>{ buildDeck(); }); }
+let currentIndex = 0; let observer = null; function setupObserver(){ if(observer) observer.disconnect(); const cards = Array.from(document.querySelectorAll('.card')); observer = new IntersectionObserver((entries)=>{ entries.forEach(entry=>{ const idx = parseInt(entry.target.dataset.index ?? '-1', 10); if(entry.isIntersecting && entry.intersectionRatio > 0.6){ cards.forEach(c=>c.classList.remove('in-view')); entry.target.classList.add('in-view'); if(!isNaN(idx) && idx >= 0){ if(idx > currentIndex) trackView(); currentIndex = idx; updateProgress(idx); } } }); }, { threshold:[0.6] }); cards.forEach(c=>observer.observe(c)); }
+function trackView(){ viewedThisSession++; if(viewedThisSession === SESSION_CAP && !nudgeShown){ nudgeShown = true; setTimeout(insertNudgeCard, 900); } }
+function insertNudgeCard(){ if(document.getElementById('nudgeCardEl')) return; const nudge = document.createElement('div'); nudge.className = 'card era-rome nudge-card'; nudge.id = 'nudgeCardEl'; nudge.innerHTML = `<div class="card-bg">${ERAS['Stoicism'].bg(95)}</div><div class="card-vignette"></div><div class="card-grain"></div><div class="quote-wrap"><div class="nudge-icon">⏸</div><div class="nudge-title">You've read ${SESSION_CAP} today.</div><div class="nudge-sub">That's a good stopping point. If one of these stuck with you, maybe go find the book it came from — that's where the rest of the thinking lives.</div><div class="nudge-actions"><button class="nudge-btn primary" id="nudgeCollection">See what you saved</button><button class="nudge-btn ghost" id="nudgeContinue">Keep scrolling</button></div></div>`; const inView = document.querySelector('.card.in-view'); if(inView && inView.nextSibling){ feed.insertBefore(nudge, inView.nextSibling); } else { feed.appendChild(nudge); } observer.observe(nudge); nudge.querySelector('#nudgeContinue').addEventListener('click', ()=>{ const next = nudge.nextElementSibling; if(next) next.scrollIntoView({behavior:'smooth'}); }); nudge.querySelector('#nudgeCollection').addEventListener('click', openCollectionSheet); }
+function updateProgress(idx){ const total = deck.length; counter.textContent = String(Math.min(idx+1,total)).padStart(2,'0') + ' / ' + String(total).padStart(2,'0'); document.querySelectorAll('.rail-seg').forEach((seg,i)=>{ seg.classList.toggle('done', i <= idx); }); }
+const sheetBackdrop = document.getElementById('sheetBackdrop'); const contextSheet = document.getElementById('contextSheet'); function openContextSheet(q){ document.getElementById('sheetAuthor').textContent = q.author; document.getElementById('sheetSource').textContent = q.source; document.getElementById('sheetContext').textContent = q.context || 'No further context noted for this one yet.'; const link = document.getElementById('sheetLink'); if(q.link){ link.href = q.link; link.style.display = 'inline-flex'; } else { link.style.display = 'none'; } sheetBackdrop.classList.add('show'); contextSheet.classList.add('show'); }
+function closeSheets(){ sheetBackdrop.classList.remove('show'); contextSheet.classList.remove('show'); filterSheet.classList.remove('show'); collectionSheet.classList.remove('show'); }
+sheetBackdrop.addEventListener('click', closeSheets);
+const filterBtn = document.getElementById('filterBtn'); const filterSheet = document.getElementById('filterSheet'); const filterGrid = document.getElementById('filterGrid'); CATEGORIES.forEach(cat=>{ const chip = document.createElement('button'); chip.className = 'chip active'; chip.innerHTML = `<span class="chip-dot" style="background:${ERAS[cat].dot}"></span>${cat}`; chip.dataset.cat = cat; chip.addEventListener('click', ()=>{ if(activeCategories.has(cat)){ if(activeCategories.size > 1){ activeCategories.delete(cat); chip.classList.remove('active'); } } else { activeCategories.add(cat); chip.classList.add('active'); } }); filterGrid.appendChild(chip); }); filterBtn.addEventListener('click', ()=>{ sheetBackdrop.classList.add('show'); filterSheet.classList.add('show'); }); document.getElementById('filterApply').addEventListener('click', ()=>{ closeSheets(); buildDeck(); });
+const collectionBtn = document.getElementById('collectionBtn'); const collectionSheet = document.getElementById('collectionSheet'); const collectionList = document.getElementById('collectionList'); function openCollectionSheet(){ renderCollectionList(); sheetBackdrop.classList.add('show'); collectionSheet.classList.add('show'); }
+function renderCollectionList(){ const saved = getSaved(); if(saved.length === 0){ collectionList.innerHTML = '<div class="coll-empty">Nothing saved yet.<br>Tap the bookmark on any quote to keep it here.</div>'; return; } collectionList.innerHTML = saved.map(s=>`<div class="coll-item"><div class="coll-item-text">\"${s.text}\"</div><div class="coll-item-meta"><span>${s.author} · ${s.source}</span><button class="coll-remove" data-key="${s.key}">remove</button></div></div>`).join(''); collectionList.querySelectorAll('.coll-remove').forEach(btn=>{ btn.addEventListener('click', ()=>{ const arr = getSaved().filter(s=>s.key !== btn.dataset.key); setSaved(arr); renderCollectionList(); updateSavedBadge(); document.querySelectorAll('.save-btn').forEach(b=>{ const idx = parseInt(b.dataset.idx,10); const q = deck[idx]; if(q && quoteKey(q) === btn.dataset.key){ b.classList.remove('saved'); b.innerHTML = svgBookmark(false); } }); }); }); }
+collectionBtn.addEventListener('click', openCollectionSheet);
+let holdTimer = null; let isHolding = false; function startHold(e){ if(e.target.closest('.restart-btn, .save-btn, .source, .nudge-btn, .icon-btn')) return; holdTimer = setTimeout(()=>{ isHolding = true; document.body.classList.add('holding'); dimOverlay.classList.add('active'); feed.style.scrollSnapType = 'none'; if(navigator.vibrate) navigator.vibrate(8); }, 280); } function endHold(){ clearTimeout(holdTimer); if(isHolding){ isHolding = false; document.body.classList.remove('holding'); dimOverlay.classList.remove('active'); feed.style.scrollSnapType = 'y mandatory'; } }
+feed.addEventListener('pointerdown', startHold); feed.addEventListener('pointerup', endHold); feed.addEventListener('pointerleave', endHold); feed.addEventListener('pointercancel', endHold);
+document.addEventListener('keydown', (e)=>{ if(contextSheet.classList.contains('show') || filterSheet.classList.contains('show') || collectionSheet.classList.contains('show')){ if(e.key === 'Escape') closeSheets(); return; } const cards = Array.from(document.querySelectorAll('.card')); if(e.key === 'ArrowDown' || e.key === ' '){ e.preventDefault(); cards[Math.min(currentIndex+1, cards.length-1)].scrollIntoView({behavior:'smooth'}); } else if(e.key === 'ArrowUp'){ e.preventDefault(); cards[Math.max(currentIndex-1, 0)].scrollIntoView({behavior:'smooth'}); } });
+buildDeck();
+</script>
+</body>
+</html>

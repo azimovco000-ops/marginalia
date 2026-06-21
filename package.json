@@ -1,0 +1,16 @@
+{
+  "name": "marginalia",
+  "version": "1.0.0",
+  "description": "A digital commonplace book of quotes on how to live",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["quotes", "philosophy", "reading"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": "18"
+  }
+}
